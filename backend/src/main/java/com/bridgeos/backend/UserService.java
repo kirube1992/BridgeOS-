@@ -25,7 +25,6 @@ public class UserService {
 
         return userRepository.save(user);
     }
-
     public List<User> getAlluser() {
         log.info("fetch all users");
         return userRepository.findAll();
@@ -37,4 +36,22 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
+    public User updateUser(Long id,User updatedUser) {
+        User existingUser = getUserById(id);
+
+
+        existingUser.setName(updatedUser.getName());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setRole(updatedUser.getRole());
+
+        return  userRepository.save(existingUser);
+    }
+
+
+    public void deleteUser(Long id) {
+       log.info("Update the user with Id: {}", id);
+
+       getUserById(id);
+       userRepository.deleteById(id);
+    }
 }
