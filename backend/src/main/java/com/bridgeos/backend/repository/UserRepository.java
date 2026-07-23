@@ -1,5 +1,6 @@
-package com.bridgeos.backend;
+package com.bridgeos.backend.repository;
 
+import com.bridgeos.backend.entity.User;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;

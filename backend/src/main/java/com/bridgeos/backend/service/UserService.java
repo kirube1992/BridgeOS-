@@ -1,6 +1,8 @@
-package com.bridgeos.backend;
+package com.bridgeos.backend.service;
 
 
+import com.bridgeos.backend.entity.User;
+import com.bridgeos.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

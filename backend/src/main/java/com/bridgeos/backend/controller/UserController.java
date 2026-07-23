@@ -1,5 +1,7 @@
-package com.bridgeos.backend;
+package com.bridgeos.backend.controller;
 
+import com.bridgeos.backend.entity.User;
+import com.bridgeos.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class UserController {
 
-    private final  UserService  userService;
+    private final UserService userService;
 
     @PostMapping
      public ResponseEntity<User> createUser(@Valid @RequestBody User user){
