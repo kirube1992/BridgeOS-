@@ -59,16 +59,3 @@ public class Task {
 
 }
 
-enum  TaskStatus {
-    ACTIVE,
-    PENDING,
-    COMPLETED,
-    ON_HOLD
-}
-
-enum Priority {
-    HIGH,
-    LOW,
-    MEDIUM,
-    URGENT
-}

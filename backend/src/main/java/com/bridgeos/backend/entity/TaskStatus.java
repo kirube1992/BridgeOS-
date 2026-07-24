@@ -1,9 +1,8 @@
 package com.bridgeos.backend.entity;
 
-public enum ProjectStatus {
+public enum TaskStatus {
     ACTIVE,
-    ON_HOLD,
+    PENDING,
     COMPLETED,
-    ARCHIVED,
-    ONGOING
+    ON_HOLD
 }
