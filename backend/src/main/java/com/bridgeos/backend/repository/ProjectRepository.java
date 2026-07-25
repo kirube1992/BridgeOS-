@@ -16,7 +16,5 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByNameContiningIgnoreCase(String name);
 
-
-
 }
 

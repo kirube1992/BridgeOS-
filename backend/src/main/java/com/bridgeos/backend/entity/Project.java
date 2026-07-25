@@ -21,7 +21,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true)
-    private String title;
+    private String name;
     @Column(nullable = false, name = "status")
     @Enumerated(EnumType.STRING)
     private ProjectStatus  status = ProjectStatus.ACTIVE;
@@ -30,7 +30,7 @@ public class Project {
     @Column(length = 500)
     private String description;
 
-    @Column(name="clinet_context", length = 1000)
+    @Column(name="client_context", length = 1000)
     private String clientContext;
 
     @Column(name ="deadline")
