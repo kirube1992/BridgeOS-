@@ -2,6 +2,7 @@ package com.bridgeos.backend.service;
 
 
 import com.bridgeos.backend.entity.Project;
+import com.bridgeos.backend.entity.ProjectStatus;
 import com.bridgeos.backend.entity.User;
 import com.bridgeos.backend.repository.ProjectRepository;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -21,12 +23,32 @@ public class ProjectService {
     private final UserService  userService;
 
     @Transactional
-    private  Project createProject(Project project, Long userId) {
+    public   Project createProject(Project project, Long userId) {
+
+
+
 
         log.info("Creating a project {}", project.getName());
         User createdBy = userService.getUserById(userId);
         project.setCreatedBy(createdBy);
+        project.setProjectManager(createdBy);
 
+
+        if (project.getName() == null) {
+            project.setName("Untitled Project");
+        }
+
+        if (project.getCreatedAt() == null) {
+            project.setCreatedAt(LocalDateTime.now());
+        }
+        if (project.getUpdatedAt() == null) {
+            project.setUpdatedAt(LocalDateTime.now());
+        }
+
+        // Default status if not set
+        if (project.getStatus() == null) {
+            project.setStatus(ProjectStatus.ACTIVE);
+        }
         return projectRepository.save(project);
 
     }
@@ -64,6 +86,10 @@ public class ProjectService {
         getProjectById(id);
 
         projectRepository.deleteById(id);
+    }
+    public List<Project> getProjectsByUser(Long userId) {
+        log.info("Fetching projects for user: {}", userId);
+        return projectRepository.findByCreatedById(userId);
     }
 
 }

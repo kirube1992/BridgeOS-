@@ -14,7 +14,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByCreatedById(Long UserID);
 
-    List<Project> findByNameContiningIgnoreCase(String name);
+    List<Project> findByNameContainingIgnoreCase(String name);
 
 }
 

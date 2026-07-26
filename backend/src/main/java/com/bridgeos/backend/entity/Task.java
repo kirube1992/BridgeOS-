@@ -29,20 +29,23 @@ public class Task {
     @Column(length = 1000, name = "businessContextNotes")
     private String businessContextNotes;
 
-    @Column(name = "Priority")
+    @Column(name = "priority")
     @Enumerated(EnumType.STRING)
     private Priority priority = Priority.MEDIUM;
 
     @Column(name = "deadLine")
     private LocalDate deadLine;
 
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
 
     @Column(name = "updated_at")
-    private LocalDateTime updateAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)

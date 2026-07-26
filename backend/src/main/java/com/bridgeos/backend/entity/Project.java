@@ -20,13 +20,14 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true,name = "title")
     private String name;
     @Column(nullable = false, name = "status")
     @Enumerated(EnumType.STRING)
     private ProjectStatus  status = ProjectStatus.ACTIVE;
-    @Column(nullable = false)
-    private String projectManager;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_manager", nullable = false)
+    private User projectManager;
     @Column(length = 500)
     private String description;
 
