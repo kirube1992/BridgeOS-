@@ -22,7 +22,6 @@ public class ProjectService {
 
 
     @Transactional
-
     private  Project createProject(Project project, Long userId) {
 
         log.info("Creating a project {}", project.getName());
@@ -41,4 +40,15 @@ public class ProjectService {
         return projectRepository.findAll();
 
     }
+
+    public Project getProjectById(long id) {
+
+
+       log.info("fetching user by id {}", id);
+
+       return projectRepository.findById(id)
+               .orElseThrow(() -> new RuntimeException("Project not found by id: " + id));
+    }
+
+
 }
