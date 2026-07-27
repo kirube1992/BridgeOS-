@@ -1,0 +1,47 @@
+package com.bridgeos.backend.entity;
+
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "department")
+@NoArgsConstructor
+@AllArgsConstructor
+public class Department {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+
+    @Column(nullable = true, name = "description")
+    private String description;
+
+
+    @Column(name="default_work_flow")
+    private String defaultWorkFlow;
+
+    @Column(name="created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name="updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany (mappedBy = "department")
+    private List<User> users = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkItem>  workItems = new ArrayList<>();
+}
+
