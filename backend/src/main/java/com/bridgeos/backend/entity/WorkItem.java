@@ -66,4 +66,8 @@ public class WorkItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="created_by", nullable = false)
     private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 }
