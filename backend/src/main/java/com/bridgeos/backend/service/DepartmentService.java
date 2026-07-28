@@ -28,12 +28,10 @@ public class DepartmentService {
         return departmentRepository.save(department);
 
     }
-
     public List<Department> getAllDepartment(){
         log.info("get all department ");
         return departmentRepository.findAll();
     }
-
 
     public Department getDepartmentById(Long id) {
         log.info("get department by id: {}", id);
@@ -41,7 +39,6 @@ public class DepartmentService {
         return departmentRepository.findById(id)
                 .orElseThrow(()->  new RuntimeException("Department not found with id:" + id));
     }
-
     public Department getDepartmentByName(String name) {
         log.info("get department by name: {}", name);
 
