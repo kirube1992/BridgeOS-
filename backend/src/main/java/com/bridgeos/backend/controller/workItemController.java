@@ -21,15 +21,21 @@ import java.util.List;
 @RequestMapping("/api/work-item")
 public class workItemController {
 
-    private WorkItemService workItemService;
+    private final WorkItemService workItemService;
 
     @PostMapping
-    public ResponseEntity<WorkItem> createWorkItem(@Valid @RequestBody WorkItem workItem, Long projectId, Long createdByUserID, @RequestBody(required = false) Long departmentID, @RequestBody(required = false) Long assignedToUserId) {
+    public ResponseEntity<WorkItem> createWorkItem(@Valid @RequestBody WorkItem workItem, Long projectId, Long createdByUserID, @RequestParam(required = false) Long departmentID, @RequestParam(required = false) Long assignedToUserId) {
         log.info("POST api/work-item - crating work items{}:", workItem.getTitle());
         WorkItem  createWorkItem = workItemService.createWorkItem(workItem,projectId,createdByUserID,departmentID,assignedToUserId);
         return  ResponseEntity.status(HttpStatus.CREATED).body(createWorkItem);
     }
 
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<WorkItem>> getWorkItemsByProject(@PathVariable Long projectId) {
+        log.info("GET /api/work-items/project/{} - Fetching work items", projectId);
+        List<WorkItem> workItems = workItemService.getWorkItemsByProject(projectId);
+        return ResponseEntity.ok(workItems);
+    }
 
     @GetMapping("./{id}")
     public ResponseEntity<WorkItem> getWorkItemById(@PathVariable Long id) {
@@ -38,7 +44,9 @@ public class workItemController {
         return ResponseEntity.ok(workItem);
     }
 
-    @GetMapping("/porject/{projectId}")
+
+
+    @GetMapping("/department/{departmentId}")
     public ResponseEntity <List<WorkItem>> getWorkItemByDepartment(@PathVariable Long departmentId) {
         log.info("GET /api/work-items/department/{} - Fetching work items", departmentId);
         List<WorkItem> workItems = workItemService.getWorkItemsByProject(departmentId);
