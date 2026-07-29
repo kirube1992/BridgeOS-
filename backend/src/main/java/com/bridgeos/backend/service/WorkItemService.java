@@ -1,15 +1,13 @@
 package com.bridgeos.backend.service;
 
 
-import com.bridgeos.backend.entity.Department;
-import com.bridgeos.backend.entity.Project;
-import com.bridgeos.backend.entity.User;
-import com.bridgeos.backend.entity.WorkItem;
+import com.bridgeos.backend.entity.*;
 import com.bridgeos.backend.repository.WorkItemRepository;
 import jdk.dynalink.linker.LinkerServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +53,7 @@ public class WorkItemService {
             workItem.setUpdatedAt((LocalDateTime.now()));
         }
 
+        calculateClarityScore(workItem);
         return  workItemRepository.save(workItem);
 
     }
@@ -79,5 +78,76 @@ public class WorkItemService {
         log.info("Fetch workItems by departmentId: {}", departmentId);
 
         return workItemRepository.findByDepartmentId(departmentId);
+    }
+
+    public List<WorkItem> getWorkItemByAssignee(Long userID) {
+        log.info("Fetching work items assign to user: {}", userID);
+
+        return  workItemRepository.findByAssignedToId(userID);
+    }
+
+
+    @Transactional
+    public WorkItem updateWorkItem(Long id, WorkItem updatingWorkItem) {
+        log.info("updating work item with id: {}", id);
+
+        WorkItem exstingWorkItem = getWorkItemById(id);
+
+
+        exstingWorkItem.setTitle(updatingWorkItem.getTitle());
+        exstingWorkItem.setDescription(updatingWorkItem.getDescription());
+        exstingWorkItem.setBusinessContextNotes(updatingWorkItem.getBusinessContextNotes());
+        exstingWorkItem.setAcceptanceCriteria(updatingWorkItem.getAcceptanceCriteria());
+        exstingWorkItem.setStatus(updatingWorkItem.getStatus());
+        exstingWorkItem.setPriority(updatingWorkItem.getPriority());
+        exstingWorkItem.setDeadline(updatingWorkItem.getDeadline());
+        exstingWorkItem.setUpdatedAt(updatingWorkItem.getUpdatedAt());
+
+        calculateClarityScore(exstingWorkItem);
+
+        if(updatingWorkItem.getAssignedTo() != null) {
+            User newAssignee = userService.getUserById(updatingWorkItem.getAssignedTo().getId());
+            exstingWorkItem.setAssignedTo(newAssignee);
+        }
+
+        return workItemRepository.save(exstingWorkItem);
+    }
+
+    @Transactional
+    public void deleteWorkItem(long id) {
+        log.info("deleting work item with id:{}", id);
+
+        getWorkItemById(id);
+        workItemRepository.deleteById(id);
+    }
+
+    @Transactional
+    public WorkItem updateStatus(Long id, WorkItemStatus status) {
+        log.info("updating status of work items");
+        WorkItem workItem = getWorkItemById(id);
+
+        workItem.setStatus(status);
+        workItem.setUpdatedAt(LocalDateTime.now());
+        return workItemRepository.save(workItem);
+    }
+
+    private void calculateClarityScore(WorkItem workItem) {
+        int score = 0;
+        if (workItem.getBusinessContextNotes() != null && !workItem.getBusinessContextNotes().isEmpty()) {
+            score += 25;
+        }
+        if (workItem.getAcceptanceCriteria() != null && !workItem.getAcceptanceCriteria().isEmpty()) {
+            score += 25;
+        }
+        if (workItem.getDeadline() != null) {
+            score += 15;
+        }
+        if (workItem.getTitle() != null && workItem.getTitle().length() >= 10) {
+            score += 20;
+        }
+        if (workItem.getDescription() != null && workItem.getDescription().length() >= 20) {
+            score += 15;
+        }
+        workItem.setClarityScore(Math.min(100, score));
     }
 }
