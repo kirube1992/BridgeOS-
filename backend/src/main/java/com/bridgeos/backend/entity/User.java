@@ -23,4 +23,8 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 }

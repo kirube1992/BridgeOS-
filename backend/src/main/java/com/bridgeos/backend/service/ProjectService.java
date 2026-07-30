@@ -58,7 +58,7 @@ public class ProjectService {
         return projectRepository.findAll();
     }
 
-    public Project getProjectById(long id) {
+    public Project getProjectById(Long id) {
        log.info("fetching user by id {}", id);
        return projectRepository.findById(id)
                .orElseThrow(() -> new RuntimeException("Project not found by id: " + id));

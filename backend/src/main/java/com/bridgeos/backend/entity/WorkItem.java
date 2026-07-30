@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.util.Lazy;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class WorkItem {
     private WorkItemStatus status = WorkItemStatus.TODO;
 
     @Column(name="dead_line")
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     @Column(name ="created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
