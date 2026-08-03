@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -27,6 +28,10 @@ public class MetricsDaily {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Column(name = "metric_date", nullable = false)
+    private LocalDate metricDate;
+
 
     @Column(name = "items_resolved")
     private Integer itemsResolved = 0;
