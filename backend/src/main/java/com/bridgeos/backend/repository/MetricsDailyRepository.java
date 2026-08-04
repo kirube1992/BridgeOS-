@@ -18,4 +18,5 @@ public interface MetricsDailyRepository extends JpaRepository<MetricsDaily, Long
     List<MetricsDaily>  findByUserIdOrderByMetricDateDesc (Long userId);
     List<MetricsDaily> findByDepartmentIdOrderByMetricDateDesc(Long departmentId);
     List<MetricsDaily> findByMetricDateAndDepartmentId(LocalDate date, Long departmentId);
+   List<MetricsDaily> findByMetricDateBetweenAndDepartmentId(LocalDate startDate,LocalDate endDate,Long departmentId);
 }
