@@ -3,6 +3,7 @@ package com.bridgeos.backend.controller;
 
 import com.bridgeos.backend.entity.MetricsDaily;
 import com.bridgeos.backend.repository.MetricsDailyRepository;
+import com.bridgeos.backend.service.MetricsDailyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,20 @@ import java.util.List;
 public class MetricsDailyController {
 
     private final MetricsDailyRepository metricsDailyRepository;
+    private final MetricsDailyService metricsDailyService;
+
+
+    @PostMapping("/metrics/trigger")
+    public ResponseEntity<String> triggerMetrics() {
+        log.info("Manually triggering metrics generation");
+        metricsDailyService.triggerManualMetricsGeneration();
+        return ResponseEntity.ok("Metrics generation triggered successfully!");
+    }
+
+    @GetMapping("/metrics/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("Metrics controller is alive!");
+    }
 
     @GetMapping("/leaderbord")
     public ResponseEntity<List<MetricsDaily>> getLeaderboard(@RequestParam(defaultValue = "week") String period, @RequestParam(required = false) Long departmentId) {

@@ -31,6 +31,14 @@ public class MetricsDailyService {
     private final UserService userService;
     private final WorkItemRepository workItemRepository;
 
+
+    public void triggerManualMetricsGeneration() {
+        log.info("Manual trigger - generating daily metrics");
+        generateDailyMetric();
+    }
+
+
+
     @Scheduled(cron = "0 0 1 * * *")
     @Transactional
     public void generateDailyMetric() {
