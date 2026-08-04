@@ -55,8 +55,8 @@ public class MetricsDailyController {
 
 
     @GetMapping("/user/{UserId}")
-    public ResponseEntity<List<MetricsDaily>> getUserMetrics(@PathVariable Long UerId) {
-        List<MetricsDaily> metrics = metricsDailyRepository.findByUserIdOrderByMetricDateDesc(UerId);
+    public ResponseEntity<List<MetricsDaily>> getUserMetrics(@PathVariable Long UserId) {
+        List<MetricsDaily> metrics = metricsDailyRepository.findByUserIdOrderByMetricDateDesc(UserId);
 
         return  ResponseEntity.ok(metrics);
     }

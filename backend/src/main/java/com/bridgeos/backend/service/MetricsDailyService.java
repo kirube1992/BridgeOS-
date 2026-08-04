@@ -87,6 +87,7 @@ public class MetricsDailyService {
     private List<WorkItem>  getResolvedItemsForUser(LocalDate date, User user) {
         return workItemRepository.findByAssignedToId(user.getId()).stream()
                 .filter(item -> item.getStatus()== WorkItemStatus.DONE)
+                .filter(item -> item.getUpdatedAt() != null)
                 .filter(item -> item.getUpdatedAt().toLocalDate().equals(date))
                 .collect(Collectors.toList());
     }
@@ -100,6 +101,7 @@ public class MetricsDailyService {
 
     private List<WorkItem> getItemsForUser(LocalDate date, User user) {
         return workItemRepository.findByAssignedToId(user.getId()).stream()
+                .filter(item -> item.getUpdatedAt() != null)
                 .filter(item -> item.getUpdatedAt().toLocalDate().equals(date))
                 .collect(Collectors.toList());
     }
