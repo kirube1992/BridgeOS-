@@ -89,6 +89,4 @@ public class MetricsDailyController {
     }
 
     record SummaryDto(int totalResolved, double avgResolutionHours) {}
-
-
 }
