@@ -7,17 +7,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.ResourceBundle;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/audit")
-public class Audit {
+public class AuditController {
 
     private  final AuditService auditService;
 
@@ -52,12 +50,11 @@ public class Audit {
                 request.getDecision(),
                 request.getContext()
         );
-
         return  ResponseEntity.status(HttpStatus.CREATED).body(event);
+
+
     }
-
-
-    class DecisionRequest {
+    static class DecisionRequest {
         private String decision;
         private String context;
         private Long projectId;

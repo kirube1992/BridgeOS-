@@ -68,7 +68,7 @@ public class AuditService {
         LocalDateTime toDate = parseDate(to);
 
         if (projectId != null) {
-            return auditEventRepository.findByProjectIdAndAtBetween(projectId, fromDate, toDate);
+            return auditEventRepository.findByProjectIdAndCreatedAtBetween(projectId, fromDate, toDate);
         }
 
         if (keyword != null && !keyword.isEmpty()) {
