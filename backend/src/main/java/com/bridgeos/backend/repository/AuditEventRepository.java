@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
 
-
     List<AuditEvent> findByEntityTypeAndEntityId(String entityType, Long entityId);
 
     List<AuditEvent> findByProjectID(Long projectiD);
@@ -24,11 +23,8 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
             "CAST(a.detail AS text) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<AuditEvent> searchByKeyword(String keyword);
 
-
     List<AuditEvent> seracByKeyWord(String keyword);
 
     List<AuditEvent>  findByProjectIdAndAtBetween(Long porjectId, LocalDateTime start, LocalDateTime end);
-
-
 
 }
