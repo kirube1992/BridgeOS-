@@ -16,6 +16,8 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
 
     List<AuditEvent> findByProjectID(Long projectiD);
 
+    List<AuditEvent> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
     List<AuditEvent> findByActorId(Long actorId);
 
     @Query("SELECT a FROM AuditEvent a WHERE " +
