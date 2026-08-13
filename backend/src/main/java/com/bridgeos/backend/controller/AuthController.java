@@ -59,6 +59,12 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = jwtService.generateToken(userDetails);
 
+        // Get the role from the UserDetails (or from the database)
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        if (role.startsWith("ROLE_")) {
+            role = role.substring(5);
+        }
+
         return ResponseEntity.ok(new LoginResponse(
                 token,
                 request.getEmail(),
