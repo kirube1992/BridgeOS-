@@ -1,4 +1,4 @@
-package config;
+package com.bridgeos.backend.config;
 
 import com.bridgeos.backend.entity.*;
 import com.bridgeos.backend.repository.DepartmentRepository;

@@ -21,6 +21,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     private Long  expiration;
 
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
     private SecretKey getSigningKey(){
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
