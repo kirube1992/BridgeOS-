@@ -1,7 +1,6 @@
 package com.bridgeos.backend.config;
 
 import com.bridgeos.backend.service.JwtService;
-import  com.bridgeos.backend.config.JwtAuthenticationFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
