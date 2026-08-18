@@ -1,83 +1,48 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-      <div>
-        <div class="flex justify-center">
-          <div class="h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center">
-            <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-          </div>
-        </div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          BridgeOS
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Sign in to your account
-        </p>
+  <main class="auth-shell">
+    <section class="auth-art">
+      <div class="art-copy">
+        <div class="bridge-mark"><span class="mark-icon">B</span> BridgeOS</div>
+        <div class="eyebrow">{{ t('auth.login.eyebrowArt') }}</div>
+        <h1>{{ t('auth.login.titleArt') }}</h1>
+        <p>{{ t('auth.login.descriptionArt') }}</p>
       </div>
-
-      <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-        <div class="space-y-4">
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="you@example.com"
-            />
-          </div>
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="••••••••"
-            />
-          </div>
+    </section>
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="locale-switch" :aria-label="t('auth.languageLabel')">
+          <button :class="{ active: locale === 'en' }" type="button" @click="changeLocale('en')">{{ t('language.english') }}</button>
+          <button :class="{ active: locale === 'zh' }" type="button" @click="changeLocale('zh')">{{ t('language.chinese') }}</button>
         </div>
-
-        <div v-if="error" class="text-red-600 text-sm text-center bg-red-50 p-2 rounded-lg">
-          {{ error }}
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            :disabled="loading"
-            class="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-150"
-          >
-            {{ loading ? 'Signing in...' : 'Sign in' }}
-          </button>
-        </div>
-
-        <div class="text-sm text-center">
-          <router-link to="/register" class="font-medium text-indigo-600 hover:text-indigo-500 transition">
-            Don't have an account? <span class="underline">Register</span>
-          </router-link>
-        </div>
-      </form>
-
-      <div class="mt-6 text-center text-xs text-gray-400">
-        <span>BridgeOS — Ethiopia-China Collaboration Platform</span>
+        <div class="eyebrow">{{ t('auth.login.eyebrow') }}</div>
+        <h2>{{ t('auth.login.title') }}</h2>
+        <p>{{ t('auth.login.description') }}</p>
+        <form class="form-stack" @submit.prevent="handleLogin">
+          <div class="field"><label for="email">{{ t('auth.login.email') }}</label><input id="email" v-model="email" type="email" required :placeholder="t('auth.login.emailPlaceholder')" /></div>
+          <div class="field"><label for="password">{{ t('auth.login.password') }}</label><input id="password" v-model="password" type="password" required :placeholder="t('auth.login.passwordPlaceholder')" /></div>
+          <div v-if="error" class="form-error">{{ error }}</div>
+          <button class="primary-button" type="submit" :disabled="loading">{{ loading ? t('auth.login.loading') : t('auth.login.submit') }}</button>
+        </form>
+        <div class="auth-footer">{{ t('auth.login.newToBridge') }} <router-link to="/register">{{ t('auth.login.createAccount') }}</router-link><br /><span>{{ t('auth.login.footer') }}</span></div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
+import { setLocale, type Locale } from '@/i18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
+
+const changeLocale = (nextLocale: Locale): void => {
+  setLocale(nextLocale)
+}
 
 const email = ref<string>('')
 const password = ref<string>('')
@@ -93,7 +58,7 @@ const handleLogin = async (): Promise<void> => {
   if (result.success) {
     router.push('/dashboard')
   } else {
-    error.value = result.message || 'Login failed'
+    error.value = result.message || t('auth.login.failed')
   }
 
   loading.value = false

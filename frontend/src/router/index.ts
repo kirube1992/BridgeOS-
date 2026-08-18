@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import Login from '@/Views/login.vue'
+import Login from '@/Views/Login.vue'
 import Register from '@/Views/Register.vue'
 import Dashboard from '@/Views/Dashbord.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -57,4 +57,4 @@ router.beforeEach((to, from) => {
   return true
 })
 
-export default router
+export default router 
