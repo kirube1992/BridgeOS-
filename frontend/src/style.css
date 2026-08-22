@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
 
 :root {
 	--bridge-ink: #10232b;
@@ -52,11 +53,11 @@ a { color: inherit; text-decoration: none; }
 .locale-switch button.active { border-color: var(--bridge-cyan); color: var(--bridge-ink); background: var(--bridge-cyan-soft); font-weight: 800; }
 
 .dashboard-shell { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr; background: var(--bridge-paper); }
-.side-nav { display: flex; flex-direction: column; padding: 26px 18px; color: #d3e6e8; background: var(--bridge-ink); }
+.side-nav { display: flex; flex-direction: column; padding: 26px 18px; color: #d3e6e8; background: #0d252d; }
 .side-nav .bridge-mark { margin: 0 12px 64px; color: white; }
 .nav-label { margin: 0 12px 12px; color: #719097; font-family: 'DM Mono', monospace; font-size: .65rem; text-transform: uppercase; letter-spacing: .14em; }
 .nav-link { display: flex; align-items: center; gap: 12px; margin: 2px 0; border-radius: 9px; padding: 12px; color: #a9c2c5; font-size: .84rem; }
-.nav-link.active, .nav-link:hover { color: white; background: #214b55; }
+.nav-link.active, .nav-link:hover { color: white; background: #245360; }
 .nav-link.active::before { content: ''; width: 4px; height: 18px; margin-left: -12px; border-radius: 0 4px 4px 0; background: var(--bridge-cyan); }
 .side-bottom { margin-top: auto; border-top: 1px solid #2a4a51; padding: 18px 12px 0; }
 .profile-row { display: flex; align-items: center; gap: 10px; color: white; font-size: .8rem; }

@@ -54,6 +54,34 @@ export interface AuditEvent {
   project: Project | null
   createdAt: string
 }
+export interface Decision {
+  id: number
+  summary: string
+  detail: string
+  decision?: string
+  context?: string
+  eventType: string
+  actor: User
+  project: Project | null
+  createdAt: string
+}
+export interface LeaderboardEntry {
+  id: number
+  metricDate: string
+  user: User
+  itemsResolved: number
+  itemsCreated: number
+  avgResolutionHours: number
+  medianResolutionHours: number
+  clarityAvgScore: number
+}
+
+export interface SummaryStats {
+  totalResolved: number
+  avgResolutionHours: number
+  totalUsers: number
+  avgClarityScore: number
+}
 
 export interface MetricsDaily {
   id: number
@@ -65,6 +93,37 @@ export interface MetricsDaily {
   avgResolutionHours: number
   medianResolutionHours: number
   clarityAvgScore: number
+}
+
+export interface AnalyticsSummary {
+  totalResolved: number
+  averageResolutionHours: number
+  activeUsers: number
+  averageClarityScore: number
+  departments: number
+  trends?: {
+    totalResolved?: number
+    averageResolutionHours?: number
+    activeUsers?: number
+    averageClarityScore?: number
+    departments?: number
+  }
+}
+
+export interface LeaderboardEntry {
+  user: User
+  itemsResolved: number
+  averageResolutionHours: number
+  averageClarityScore: number
+  department?: Department | null
+}
+
+export interface UserMetrics {
+  user: User
+  itemsResolved: number
+  averageResolutionHours: number
+  averageClarityScore: number
+  statusCounts?: Partial<Record<WorkItem['status'], number>>
 }
 
 export interface LoginResponse {

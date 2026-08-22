@@ -2,6 +2,14 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import Login from '@/Views/Login.vue'
 import Register from '@/Views/Register.vue'
 import Dashboard from '@/Views/Dashbord.vue'
+import Projects from '@/Views/Projects.vue'
+import TaskDetail from '@/Views/TaskDetail.vue'
+import Tasks from '@/Views/Task.vue'
+import TaskForm from '@/Views/TaskForm.vue'
+import DecisionLog from '@/Views/DecisionLog.vue'
+import Analytics from '@/Views/Analytics.vue'
+import UserAnalytics from '@/Views/UserAnalytics.vue'
+import UserProfile from '@/Views/UserProfile.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -10,6 +18,60 @@ const routes: RouteRecordRaw[] = [
     name: 'login',
     component: Login,
     meta: { requiresGuest: true }  // ← FIXED: requiresGuest, not requiresAuth
+  },
+  {
+  path: '/profile/:id?',
+  name: 'user-profile',
+  component: UserProfile,
+  meta: { requiresAuth: true }
+},
+  {
+    path: '/tasks',
+    name: 'tasks',
+    component: Tasks,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tasks/new',
+    name: 'task-create',
+    component: TaskForm,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tasks/:id/edit',
+    name: 'task-edit',
+    component: TaskForm,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tasks/:id',
+    name: 'task-detail',
+    component: TaskDetail,
+    meta: { requiresAuth: true }
+  },
+    {
+    path: '/projects',
+    name: 'projects',
+    component: Projects,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/decisions',
+    name: 'decisions',
+    component: DecisionLog,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/analytics',
+    name: 'analytics',
+    component: Analytics,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/analytics/user/:userId',
+    name: 'user-analytics',
+    component: UserAnalytics,
+    meta: { requiresAuth: true }
   },
   {
     path: '/register',
