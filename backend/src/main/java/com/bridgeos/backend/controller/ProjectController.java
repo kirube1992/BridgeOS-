@@ -1,6 +1,7 @@
 package com.bridgeos.backend.controller;
 
 
+import com.bridgeos.backend.DTO.ProjectDto;
 import com.bridgeos.backend.entity.Project;
 import com.bridgeos.backend.service.ProjectService;
 import com.bridgeos.backend.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -38,10 +40,29 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Project>>  getAllProject() {
-        log.info("./api/projects  fetch all projects");
+//    public ResponseEntity<List<Project>>  getAllProject() {
+//        log.info("./api/projects  fetch all projects");
+//        List<Project> projects = projectService.getAllProject();
+//        return ResponseEntity.ok(projects);
+//    }
+
+    public ResponseEntity<List<ProjectDto>> getAllProjects() {
         List<Project> projects = projectService.getAllProject();
-        return ResponseEntity.ok(projects);
+        List<ProjectDto> dtos = projects.stream()
+                .map(this::toProjectDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    private ProjectDto toProjectDto(Project project) {
+        ProjectDto dto = new ProjectDto();
+        dto.setId(project.getId());
+        dto.setName(project.getName());
+        dto.setDescription(project.getDescription());
+        dto.setClientContext(project.getClientContext());
+        dto.setStatus(project.getStatus().name());
+        // No tasks list!
+        return dto;
     }
 
     @GetMapping("/{id}")
