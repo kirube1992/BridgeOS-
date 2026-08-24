@@ -30,7 +30,7 @@ public class WorkItemController {
 
         log.info("POST /api/work-items - Creating work item: {}", workItem.getTitle());
         WorkItem createdWorkItem = workItemService.createWorkItem(
-                workItem, projectId, createdByUserID, departmentId, assignedToUserId
+            workItem, projectId, assignedToUserId, createdByUserID, departmentId
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWorkItem);
     }

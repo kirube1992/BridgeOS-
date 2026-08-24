@@ -1,6 +1,7 @@
 package com.bridgeos.backend.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class User {
     private String role;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @ManyToOne(fetch = FetchType.LAZY)

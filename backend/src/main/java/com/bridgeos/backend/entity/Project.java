@@ -2,6 +2,7 @@ package com.bridgeos.backend.entity;
 
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import com.bridgeos.backend.entity.Task;
 
@@ -50,5 +51,6 @@ public class Project {
 
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Task> tasks = new ArrayList<>();
 }

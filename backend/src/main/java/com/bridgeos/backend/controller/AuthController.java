@@ -57,6 +57,7 @@ public class AuthController {
         authenticationManager.authenticate( new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
         String token = jwtService.generateToken(userDetails);
 
         // Get the role from the UserDetails (or from the database)
@@ -67,9 +68,10 @@ public class AuthController {
 
         return ResponseEntity.ok(new LoginResponse(
                 token,
+            user.getId(),
                 request.getEmail(),
-                userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""),
-                userDetails.getUsername()
+            userDetails.getUsername(),
+            userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "")
         ));
     }
 

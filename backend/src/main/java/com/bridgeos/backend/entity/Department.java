@@ -2,6 +2,7 @@ package com.bridgeos.backend.entity;
 
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,10 +41,12 @@ public class Department {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany (mappedBy = "department")
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<WorkItem>  workItems = new ArrayList<>();
 }
 

@@ -61,7 +61,7 @@ public class WorkItem {
 
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="assigned_to", nullable = false)
+    @JoinColumn(name="assigned_to", nullable = true)
     private User assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
