@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import axios from 'axios'
 import api from '@/API'
 import type { WorkItem } from '@/types'
 
@@ -38,7 +39,9 @@ export const useTaskStore = defineStore('task', {
         const response = await api.get<WorkItem[]>('/work-items')
         this.tasks = response.data
       } catch (err: any) {
-        this.error = err.response?.data?.message || 'Failed to fetch tasks'
+        this.error = axios.isAxiosError(err) && !err.response
+          ? 'The task service is unavailable. Make sure the backend is running on port 8080, then retry.'
+          : err.response?.data?.message || 'Failed to fetch tasks'
         console.error('Fetch tasks error:', err)
       } finally {
         this.loading = false

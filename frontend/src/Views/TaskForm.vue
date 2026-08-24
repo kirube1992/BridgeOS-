@@ -352,11 +352,11 @@ const handleSubmit = async () => {
     status: form.status,
     priority: form.priority,
     deadline: form.deadline || null,
-    // For create, we need projectId and createdByUserID (temporary 1)
+    // The backend receives these IDs as query parameters for creation.
     projectId: form.projectId,
     assignedToUserId: form.assignedToId,
     departmentId: form.departmentId,
-    createdByUserID: user.value?.id || 1, // For now
+    createdByUserID: user.value?.id,
   }
 
   let result
@@ -379,14 +379,20 @@ const handleSubmit = async () => {
       const response = await api.post('/work-items', payload, {
         params: {
           projectId: form.projectId,
-          createdByUserID: user.value?.id || 1,
+          createdByUserID: user.value?.id,
           departmentId: form.departmentId || 1,
           assignedToUserId: form.assignedToId || undefined,
         }
       })
       result = { success: true, data: response.data }
     } catch (err: any) {
-      result = { success: false, error: err.response?.data?.message || 'Failed to create task' }
+      const status = err.response?.status
+      result = {
+        success: false,
+        error: status === 403
+          ? 'You are not authorized to create this task.'
+          : err.response?.data?.message || 'Failed to create task'
+      }
     }
   }
 

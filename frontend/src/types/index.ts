@@ -128,6 +128,7 @@ export interface UserMetrics {
 
 export interface LoginResponse {
   token: string
+  id: number
   email: string
   role: string
   name: string
