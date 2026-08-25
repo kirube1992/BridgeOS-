@@ -86,11 +86,9 @@ public class ProjectController {
 
         projectService.deleteProject(id);
 
-
         return ResponseEntity.noContent().build();
 
     }
-
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Project>> getProjectsByUser(@PathVariable Long userId) {
