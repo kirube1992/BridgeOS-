@@ -8,7 +8,9 @@ import com.bridgeos.backend.repository.AuditEventRepository;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,8 +62,32 @@ public class AuditService {
                 projectId
         );
 
+    }
 
+    public AuditEvent updateDecision(Long id, Long projectId, String decision, String context) {
+        AuditEvent event = findDecision(id);
+        event.setSummery(decision);
+        event.setDetail(context);
+        event.setProject(projectService.getProjectById(projectId));
+        return auditEventRepository.save(event);
+    }
 
+    public void deleteDecision(Long id) {
+        AuditEvent event = findDecision(id);
+        auditEventRepository.delete(event);
+    }
+
+    private AuditEvent findDecision(Long id) {
+        AuditEvent event = auditEventRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Decision not found"));
+        if (!"DECISION".equals(event.getEntityType())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Decision not found");
+        }
+        return event;
+    }
+
+    public Long getUserIdByEmail(String email) {
+        return userService.getUserByEmail(email).getId();
     }
     public List<AuditEvent> search(String keyword, Long projectId, String from, String to) {
         LocalDateTime fromDate = parseDate(from);
@@ -75,11 +101,15 @@ public class AuditService {
             return auditEventRepository.searchByKeyword(keyword);
         }
 
+        if (from == null && to == null) {
+            return auditEventRepository.findAllByOrderByCreatedAtDesc();
+        }
+
         return auditEventRepository.findByCreatedAtBetween(fromDate, toDate);
     }
 
     public List<AuditEvent> getProjectTimeline(Long projectId) {
-        return auditEventRepository.findByActorId(projectId);
+        return auditEventRepository.findByProjectId(projectId);
     }
 
     private LocalDateTime parseDate(String dateString) {

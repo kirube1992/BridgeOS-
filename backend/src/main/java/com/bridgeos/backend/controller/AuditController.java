@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 
 import java.util.List;
@@ -40,10 +43,11 @@ public class AuditController {
     }
 
     @PostMapping("/decisions")
-    public ResponseEntity<AuditEvent> recordDecision(@RequestBody DecisionRequest request, @RequestAttribute(required = false) Long userId) {
+    public ResponseEntity<AuditEvent> recordDecision(@Valid @RequestBody DecisionRequest request,
+                                                     java.security.Principal principal) {
         log.info("POST /api/audit/decisions - Recording decision");
 
-        Long actorId = (userId != null) ? userId : 1L;
+        Long actorId = auditService.getUserIdByEmail(principal.getName());
 
         AuditEvent event =  auditService.recordDecision(
                 actorId,
@@ -54,9 +58,30 @@ public class AuditController {
         return  ResponseEntity.status(HttpStatus.CREATED).body(event);
 
     }
+
+    @PutMapping("/decisions/{id}")
+    public ResponseEntity<AuditEvent> updateDecision(@PathVariable Long id,
+                                                     @Valid @RequestBody DecisionRequest request) {
+        AuditEvent event = auditService.updateDecision(
+                id,
+                request.getProjectId(),
+                request.getDecision(),
+                request.getContext()
+        );
+        return ResponseEntity.ok(event);
+    }
+
+    @DeleteMapping("/decisions/{id}")
+    public ResponseEntity<Void> deleteDecision(@PathVariable Long id) {
+        auditService.deleteDecision(id);
+        return ResponseEntity.noContent().build();
+    }
+
     static class DecisionRequest {
+        @NotBlank
         private String decision;
         private String context;
+        @NotNull
         private Long projectId;
 
         // Getters and setters

@@ -2,6 +2,7 @@ package com.bridgeos.backend.entity;
 
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class AuditEvent {
     private Long entityId;
 
     @Column(name = "summery", nullable = false)
+    @JsonProperty("summary")
     private String summery;
 
     @Column(name = "detail", columnDefinition = "jsonb")

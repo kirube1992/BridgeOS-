@@ -70,7 +70,7 @@ public class AuthController {
                 token,
             user.getId(),
                 request.getEmail(),
-            userDetails.getUsername(),
+            user.getName(),
             userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "")
         ));
     }
