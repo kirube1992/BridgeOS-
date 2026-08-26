@@ -87,7 +87,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+              class="px-4 py-2 text-sm font-medium text-white bg-[var(--bridge-menu)] rounded-lg hover:bg-[var(--bridge-menu-dark)] transition disabled:opacity-50"
             >
               {{ submitting ? 'Saving...' : editingProject ? 'Update Project' : 'Create Project' }}
             </button>

@@ -45,7 +45,7 @@
         </router-link>
         <button
           @click="openCreateModal"
-          class="inline-flex items-center px-4 py-2 bg-[var(--bridge-cyan)] text-[var(--bridge-ink)] text-sm font-medium rounded-lg hover:brightness-95 transition shadow-sm"
+          class="inline-flex items-center px-4 py-2 bg-[var(--bridge-menu)] text-white text-sm font-medium rounded-lg hover:bg-[var(--bridge-menu-dark)] transition shadow-sm"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -96,7 +96,7 @@
           <p class="text-gray-500 mt-1">Create your first project to get started</p>
           <button
             @click="openCreateModal"
-            class="mt-4 px-4 py-2 bg-[var(--bridge-cyan)] text-[var(--bridge-ink)] text-sm font-medium rounded-lg hover:brightness-95 transition"
+            class="mt-4 px-4 py-2 bg-[var(--bridge-menu)] text-white text-sm font-medium rounded-lg hover:bg-[var(--bridge-menu-dark)] transition"
           >
             Create Project
           </button>

@@ -37,7 +37,7 @@
         <div class="flex gap-2">
           <button
             @click="editTask"
-            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+            class="px-4 py-2 text-sm font-medium text-white bg-[var(--bridge-menu)] rounded-lg hover:bg-[var(--bridge-menu-dark)] transition"
           >
             Edit
           </button>

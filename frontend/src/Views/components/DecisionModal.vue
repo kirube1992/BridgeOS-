@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import type { Project } from '@/types'
+import { reactive, ref, watch } from 'vue'
+import type { Decision, Project } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   isOpen: boolean
   projects: Project[]
+  serverError?: string | null
+  decision?: Decision | null
 }>()
 
 const emit = defineEmits<{
@@ -15,11 +17,19 @@ const emit = defineEmits<{
 const form = reactive({ decision: '', context: '', projectId: null as number | null })
 const error = ref('')
 
-const close = (): void => {
-  form.decision = ''
-  form.context = ''
-  form.projectId = null
+const reset = (): void => {
+  form.decision = props.decision?.decision || props.decision?.summary || ''
+  form.context = props.decision?.context || props.decision?.detail || ''
+  form.projectId = props.decision?.project?.id || null
   error.value = ''
+}
+
+watch(() => props.isOpen, isOpen => {
+  if (isOpen) reset()
+})
+
+const close = (): void => {
+  reset()
   emit('close')
 }
 
@@ -43,7 +53,7 @@ const submit = (): void => {
       <div class="modal-header">
         <div>
           <span class="eyebrow">Decision log</span>
-          <h2 id="decision-modal-title">New decision</h2>
+          <h2 id="decision-modal-title">{{ props.decision ? 'Edit decision' : 'New decision' }}</h2>
         </div>
         <button class="close-button" type="button" aria-label="Close" @click="close">×</button>
       </div>
@@ -55,10 +65,10 @@ const submit = (): void => {
           <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
         </select>
       </label>
-      <p v-if="error" class="form-error">{{ error }}</p>
+      <p v-if="error || serverError" class="form-error">{{ error || serverError }}</p>
       <div class="modal-actions">
         <button class="secondary-button" type="button" @click="close">Cancel</button>
-        <button class="primary-button" type="submit">Save decision</button>
+        <button class="primary-button" type="submit">{{ props.decision ? 'Update decision' : 'Save decision' }}</button>
       </div>
     </form>
   </div>
@@ -79,5 +89,6 @@ textarea:focus, select:focus { border-color: var(--bridge-cyan); box-shadow: 0 0
 .modal-actions { display: flex; justify-content: flex-end; gap: .65rem; padding-top: .5rem; }
 .secondary-button, .primary-button { border: 0; border-radius: 7px; padding: .65rem .9rem; font-size: .75rem; font-weight: 800; }
 .secondary-button { color: var(--bridge-deep); background: #eef3f3; }
-.primary-button { color: var(--bridge-ink); background: var(--bridge-cyan); }
+.primary-button { color: white; background: var(--bridge-menu); }
+.primary-button:hover { background: var(--bridge-menu-dark); }
 </style>

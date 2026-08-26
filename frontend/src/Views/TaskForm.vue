@@ -200,7 +200,6 @@
           </div>
           <p class="text-xs text-gray-400 mt-1">Based on Business Context Notes, Acceptance Criteria, deadline, and field completeness.</p>
         </div>
-
         <!-- Error message -->
         <div v-if="submitError" class="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
           {{ submitError }}
@@ -214,7 +213,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+            class="px-4 py-2 text-sm font-medium text-white bg-[var(--bridge-menu)] rounded-lg hover:bg-[var(--bridge-menu-dark)] transition disabled:opacity-50"
           >
             {{ submitting ? 'Saving...' : isEdit ? 'Update Task' : 'Create Task' }}
           </button>

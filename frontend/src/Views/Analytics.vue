@@ -88,7 +88,7 @@ onMounted(async () => {
   <div class="analytics-page">
     <nav class="analytics-nav">
       <router-link to="/dashboard" class="brand"><span class="mark-icon">B</span><span>BridgeOS</span></router-link>
-      <div class="nav-links"><router-link to="/dashboard">Dashboard</router-link><router-link to="/projects">Projects</router-link><router-link to="/tasks">Tasks</router-link><router-link to="/decisions">Decisions</router-link><router-link class="current" to="/analytics">Analytics</router-link></div>
+      <div class="nav-links"><router-link to="/dashboard">Dashboard</router-link><router-link to="/projects">Projects</router-link><router-link to="/tasks">Tasks</router-link><router-link to="/decisions">Decisions</router-link><router-link to="/people">People & teams</router-link><router-link class="current" to="/analytics">Analytics</router-link></div>
       <div class="user-actions"><span>{{ user?.name || user?.email }}</span><button type="button" @click="logout">Log out</button></div>
     </nav>
 

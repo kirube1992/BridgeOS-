@@ -10,6 +10,7 @@ import DecisionLog from '@/Views/DecisionLog.vue'
 import Analytics from '@/Views/Analytics.vue'
 import UserAnalytics from '@/Views/UserAnalytics.vue'
 import UserProfile from '@/Views/UserProfile.vue'
+import People from '@/Views/People.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -25,6 +26,12 @@ const routes: RouteRecordRaw[] = [
   component: UserProfile,
   meta: { requiresAuth: true }
 },
+  {
+    path: '/people',
+    name: 'people',
+    component: People,
+    meta: { requiresAuth: true }
+  },
   {
     path: '/tasks',
     name: 'tasks',

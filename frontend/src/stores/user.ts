@@ -9,6 +9,17 @@ interface UserState {
   error: string | null
 }
 
+const usersCollection = (data: unknown): User[] => {
+  if (Array.isArray(data)) return data as User[]
+  if (data && typeof data === 'object') {
+    const payload = data as { content?: unknown; data?: unknown; items?: unknown }
+    if (Array.isArray(payload.content)) return payload.content as User[]
+    if (Array.isArray(payload.data)) return payload.data as User[]
+    if (Array.isArray(payload.items)) return payload.items as User[]
+  }
+  return []
+}
+
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
     users: [],
@@ -29,7 +40,7 @@ export const useUserStore = defineStore('user', {
       this.error = null
       try {
         const response = await api.get<User[]>('/users')
-        this.users = response.data
+        this.users = usersCollection(response.data)
       } catch (err: any) {
         this.error = err.response?.data?.message || 'Failed to fetch users'
       } finally {

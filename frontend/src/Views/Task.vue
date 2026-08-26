@@ -34,7 +34,7 @@
           <h1 class="text-2xl font-bold text-gray-900">Tasks</h1>
           <p class="text-sm text-gray-500">All work items across projects</p>
         </div>
-        <router-link to="/tasks/new" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+        <router-link to="/tasks/new" class="task-action px-4 py-2 bg-[var(--bridge-menu)] text-white rounded-lg hover:bg-[var(--bridge-menu-dark)] transition" style="color: white">
           + New Task
         </router-link>
       </div>
@@ -58,7 +58,7 @@
           </svg>
           <h3 class="text-lg font-medium text-gray-900">No tasks yet</h3>
           <p class="text-gray-500 mt-1">Create your first task to get started</p>
-          <router-link to="/tasks/new" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Create Task</router-link>
+          <router-link to="/tasks/new" class="task-action mt-4 px-4 py-2 bg-[var(--bridge-menu)] text-white rounded-lg hover:bg-[var(--bridge-menu-dark)]" style="color: white">Create Task</router-link>
         </div>
       </div>
 

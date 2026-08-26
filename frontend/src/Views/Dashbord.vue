@@ -34,13 +34,13 @@
       </router-link>
 
       <div class="side-bottom">
-        <div class="profile-row">
+        <router-link :to="`/profile/${user?.id || ''}`" class="profile-row">
           <span class="avatar">{{ initials }}</span>
           <div>
             <strong>{{ displayName }}</strong>
             <small>{{ user?.role || 'Team Member' }}</small>
           </div>
-        </div>
+        </router-link>
         <button class="logout-button" type="button" @click="logout">Log out / 退出</button>
       </div>
     </aside>
@@ -51,7 +51,7 @@
       <header class="topbar">
         <div>
           <div class="date-chip">{{ today }}</div>
-          <h1>Good morning, {{ firstName }}.</h1>
+          <h1>Good morning, {{ displayName }}.</h1>
         </div>
         <div class="topbar-actions">
           <button class="refresh-button" type="button" :disabled="loading" @click="fetchDashboardData">
@@ -179,7 +179,6 @@ const displayName = computed(() => {
   if (name) return name
   return user.value?.email?.split('@')[0] || 'Member'
 })
-const firstName = computed(() => displayName.value.split(' ')[0] || displayName.value)
 const initials = computed(() => {
   const parts = displayName.value.split(' ')
   if (parts.length >= 2) return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase()
@@ -375,11 +374,11 @@ onMounted(() => {
   text-align: center;
 }
 .nav-link.active {
-  background: #245360;
+  background: var(--bridge-menu);
   color: #ffffff;
 }
 .nav-link:not(.active):hover {
-  background: #245360;
+  background: var(--bridge-menu);
   color: #ffffff;
 }
 
@@ -472,6 +471,8 @@ onMounted(() => {
   font-weight: 700;
   color: #111827;
   margin-top: 0.25rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .topbar-actions {
@@ -617,7 +618,7 @@ onMounted(() => {
 }
 
 .add-button {
-  background: #4f46e5;
+  background: var(--bridge-menu);
   color: white;
   padding: 0.3rem 1rem;
   border-radius: 9999px;
@@ -630,7 +631,7 @@ onMounted(() => {
   white-space: nowrap;
 }
 .add-button:hover {
-  background: #4338ca;
+  background: var(--bridge-menu-dark);
 }
 
 .panel-state {

@@ -65,17 +65,6 @@ export interface Decision {
   project: Project | null
   createdAt: string
 }
-export interface LeaderboardEntry {
-  id: number
-  metricDate: string
-  user: User
-  itemsResolved: number
-  itemsCreated: number
-  avgResolutionHours: number
-  medianResolutionHours: number
-  clarityAvgScore: number
-}
-
 export interface SummaryStats {
   totalResolved: number
   avgResolutionHours: number

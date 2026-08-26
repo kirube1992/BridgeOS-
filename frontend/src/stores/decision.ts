@@ -70,12 +70,50 @@ export const useDecisionStore = defineStore('decision', {
     },
 
     async createDecision(data: Partial<Decision> & { projectId: number }) {
+      this.error = null
       try {
-        const response = await api.post<Decision>('/audit/decisions', data)
-        this.decisions = [response.data, ...this.decisions]
+        const response = await api.post<Decision>('/audit/decisions', {
+          projectId: data.projectId,
+          decision: data.decision || data.summary,
+          context: data.context || data.detail || ''
+        })
+        const created = normalizeDecisions(response.data)[0] || response.data
+        this.decisions = [created, ...this.decisions.filter(decision => decision.id !== created.id)]
+        return { success: true, data: created }
+      } catch (err: any) {
+        this.error = err.response?.status === 403
+          ? 'You do not have permission to create decisions.'
+          : err.response?.data?.message || 'Failed to create decision'
+        return { success: false, error: this.error }
+      }
+    },
+
+    async updateDecision(id: number, data: { decision: string; context: string; projectId: number }) {
+      this.error = null
+      try {
+        const response = await api.put<Decision>(`/audit/decisions/${id}`, data)
+        const index = this.decisions.findIndex(decision => decision.id === id)
+        if (index !== -1) this.decisions[index] = response.data
         return { success: true, data: response.data }
       } catch (err: any) {
-        return { success: false, error: err.response?.data?.message || 'Failed to create decision' }
+        this.error = err.response?.status === 403
+          ? 'You do not have permission to edit decisions.'
+          : err.response?.data?.message || 'Failed to update decision'
+        return { success: false, error: this.error }
+      }
+    },
+
+    async deleteDecision(id: number) {
+      this.error = null
+      try {
+        await api.delete(`/audit/decisions/${id}`)
+        this.decisions = this.decisions.filter(decision => decision.id !== id)
+        return { success: true }
+      } catch (err: any) {
+        this.error = err.response?.status === 403
+          ? 'You do not have permission to delete decisions.'
+          : err.response?.data?.message || 'Failed to delete decision'
+        return { success: false, error: this.error }
       }
     }
   }

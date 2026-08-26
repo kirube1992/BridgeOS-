@@ -17,6 +17,9 @@ const user = computed(() => authStore.user)
 const search = ref('')
 const selectedProject = ref<number | null>(null)
 const showModal = ref(false)
+const editingDecision = ref<Decision | null>(null)
+const deletingDecision = ref<Decision | null>(null)
+const deleteInProgress = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 
 const groups = computed(() => {
@@ -53,12 +56,46 @@ const scheduleSearch = (): void => {
 }
 
 const handleCreate = async (data: { decision: string; context: string; projectId: number }): Promise<void> => {
-  const result = await decisionStore.createDecision(data)
+  const result = editingDecision.value
+    ? await decisionStore.updateDecision(editingDecision.value.id, data)
+    : await decisionStore.createDecision(data)
   if (result.success) {
     showModal.value = false
+    editingDecision.value = null
+    const savedDecisions = decisionStore.decisions
+    await loadDecisions()
+    if (!decisionStore.decisions.length) decisionStore.decisions = savedDecisions
   } else {
-    decisionStore.error = result.error || 'Failed to create decision'
+    decisionStore.error = result.error || 'Failed to save decision'
   }
+}
+
+const editDecision = (decision: Decision): void => {
+  editingDecision.value = decision
+  decisionStore.error = null
+  showModal.value = true
+}
+
+const deleteDecision = async (decision: Decision): Promise<void> => {
+  decisionStore.error = null
+  deletingDecision.value = decision
+}
+
+const cancelDelete = (): void => {
+  if (!deleteInProgress.value) deletingDecision.value = null
+}
+
+const confirmDelete = async (): Promise<void> => {
+  if (!deletingDecision.value) return
+  deleteInProgress.value = true
+  const result = await decisionStore.deleteDecision(deletingDecision.value.id)
+  deleteInProgress.value = false
+  if (result.success) deletingDecision.value = null
+}
+
+const closeModal = (): void => {
+  showModal.value = false
+  editingDecision.value = null
 }
 
 const logout = (): void => {
@@ -81,6 +118,7 @@ onMounted(async () => {
         <router-link to="/projects">Projects</router-link>
         <router-link to="/tasks">Tasks</router-link>
         <router-link class="current" to="/decisions">Decisions</router-link>
+        <router-link to="/people">People & teams</router-link>
       </div>
       <div class="user-actions"><span>{{ user?.name || user?.email }}</span><button type="button" @click="logout">Log out</button></div>
     </nav>
@@ -105,12 +143,26 @@ onMounted(async () => {
       <section v-else class="timeline" aria-label="Decision timeline">
         <div v-for="group in groups" :key="group.date" class="timeline-group">
           <h2>{{ group.date }}</h2>
-          <DecisionCard v-for="decision in group.decisions" :key="decision.id" :decision="decision" />
+          <DecisionCard v-for="decision in group.decisions" :key="decision.id" :decision="decision" @edit="editDecision(decision)" @delete="deleteDecision(decision)" />
         </div>
       </section>
     </main>
 
-    <DecisionModal :is-open="showModal" :projects="projectStore.projects" @close="showModal = false" @submit="handleCreate" />
+    <DecisionModal :is-open="showModal" :decision="editingDecision" :projects="projectStore.projects" :server-error="decisionStore.error" @close="closeModal" @submit="handleCreate" />
+
+    <div v-if="deletingDecision" class="confirm-layer" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+      <button class="modal-backdrop" type="button" aria-label="Cancel deletion" @click="cancelDelete"></button>
+      <div class="confirm-dialog">
+        <span class="eyebrow">Decision log</span>
+        <h2 id="delete-dialog-title">Delete this decision?</h2>
+        <p>This will permanently remove the decision from the shared log.</p>
+        <p v-if="decisionStore.error" class="confirm-error">{{ decisionStore.error }}</p>
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" :disabled="deleteInProgress" @click="cancelDelete">Cancel</button>
+          <button class="danger-button" type="button" :disabled="deleteInProgress" @click="confirmDelete">{{ deleteInProgress ? 'Deleting...' : 'Delete decision' }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -128,7 +180,8 @@ onMounted(async () => {
 .eyebrow { color: #247184; font-family: 'DM Mono', monospace; font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; }
 h1 { margin: .45rem 0 .35rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.06em; }
 .page-header p { margin: 0; color: var(--bridge-muted); font-size: .85rem; }
-.new-button { display: inline-flex; align-items: center; gap: .45rem; border: 0; border-radius: 7px; padding: .75rem 1rem; color: var(--bridge-ink); background: var(--bridge-cyan); font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.new-button { display: inline-flex; align-items: center; gap: .45rem; border: 0; border-radius: 7px; padding: .75rem 1rem; color: white; background: var(--bridge-menu); font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.new-button:hover { background: var(--bridge-menu-dark); }
 .new-button span { font-size: 1.1rem; line-height: .8; }
 .filters { display: flex; gap: .75rem; margin-bottom: 2rem; }
 .search-field { display: flex; align-items: center; flex: 1; gap: .6rem; border: 1px solid var(--bridge-line); border-radius: 7px; padding: .65rem .8rem; color: var(--bridge-muted); background: white; }
@@ -143,5 +196,15 @@ h1 { margin: .45rem 0 .35rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing:
 .timeline::before { content: ''; position: absolute; top: .25rem; bottom: 1rem; left: .32rem; width: 1px; background: var(--bridge-line); }
 .timeline-group { position: relative; }
 .timeline-group > h2 { margin: 0 0 1rem; color: #247184; font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
+.confirm-layer { position: fixed; inset: 0; display: grid; place-items: center; padding: 1rem; z-index: 20; }
+.confirm-dialog { position: relative; width: min(100%, 420px); border-radius: 12px; padding: 1.5rem; background: white; box-shadow: 0 20px 60px rgba(16, 35, 43, .22); }
+.confirm-dialog h2 { margin: .45rem 0 .6rem; font-size: 1.35rem; }
+.confirm-dialog p { margin: 0; color: var(--bridge-muted); font-size: .8rem; line-height: 1.55; }
+.confirm-error { margin-top: 1rem !important; border-radius: 7px; padding: .65rem; color: #914f42 !important; background: #fff3ef; }
+.confirm-dialog .modal-actions { display: flex; justify-content: flex-end; gap: .65rem; padding-top: 1.25rem; }
+.confirm-dialog .secondary-button { border: 0; border-radius: 7px; padding: .65rem .9rem; color: var(--bridge-deep); background: #eef3f3; font-size: .75rem; font-weight: 800; }
+.danger-button { border: 0; border-radius: 7px; padding: .65rem .9rem; color: white; background: #914f42; font-size: .75rem; font-weight: 800; }
+.danger-button:hover { background: #733d34; }
+.danger-button:disabled, .secondary-button:disabled { cursor: wait; opacity: .6; }
 @media (max-width: 700px) { .decision-nav { flex-wrap: wrap; gap: 1rem; } .nav-links { order: 3; width: 100%; overflow-x: auto; padding-bottom: .2rem; } .user-actions { margin-left: auto; } .page-header { align-items: flex-start; flex-direction: column; } .filters { flex-direction: column; } select { width: 100%; } .decision-main { padding-top: 2rem; } }
 </style>
