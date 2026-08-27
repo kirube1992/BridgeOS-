@@ -27,6 +27,11 @@ public class ProjectController {
     private final ProjectService projectService;
     private  final UserService userService;
 
+    @GetMapping("/analytics")
+    public ResponseEntity<?> getProjectAnalytics(@RequestParam(required = false) String period) {
+        return ResponseEntity.ok(projectService.getProjectAnalytics(period));
+    }
+
 
     @PostMapping
     public ResponseEntity<Project> createProject(@RequestBody  @Valid Project project) {
