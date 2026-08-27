@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import api from '@/API/index'
-import type { AnalyticsSummary, LeaderboardEntry, User, UserMetrics, WorkItem } from '@/types'
+import type { AnalyticsSummary, LeaderboardEntry, ProjectAnalytics, User, UserMetrics, WorkItem } from '@/types'
 
 interface AnalyticsState {
   summary: AnalyticsSummary | null
   leaderboard: LeaderboardEntry[]
+  projectAnalytics: ProjectAnalytics[]
   userMetrics: UserMetrics | null
   loading: boolean
   error: string | null
@@ -40,6 +41,7 @@ export const useAnalyticsStore = defineStore('analytics', {
   state: (): AnalyticsState => ({
     summary: null,
     leaderboard: [],
+    projectAnalytics: [],
     userMetrics: null,
     loading: false,
     error: null,
@@ -115,6 +117,17 @@ export const useAnalyticsStore = defineStore('analytics', {
         return { success: false, error: this.error }
       } finally {
         this.loading = false
+      }
+    },
+
+    async fetchProjectAnalytics() {
+      try {
+        const response = await api.get('/projects/analytics', { params: { period: this.period.toUpperCase() } })
+        this.projectAnalytics = collection<ProjectAnalytics>(response.data)
+        return { success: true, data: this.projectAnalytics }
+      } catch (err: any) {
+        this.error = err.response?.data?.message || 'Failed to fetch project analytics'
+        return { success: false, error: this.error }
       }
     },
 

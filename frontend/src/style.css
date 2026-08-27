@@ -32,7 +32,7 @@ a { color: inherit; text-decoration: none; }
 .art-copy h1 { margin: 22px 0 18px; max-width: 520px; font-size: clamp(2.7rem, 5vw, 5.4rem); line-height: .98; letter-spacing: -.07em; }
 .art-copy p { max-width: 390px; color: #b9d4d7; line-height: 1.8; }
 .bridge-mark { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.04em; }
-.mark-icon { display: grid; place-items: center; width: 36px; height: 36px; color: var(--bridge-ink); background: var(--bridge-cyan); border-radius: 11px; font-weight: 800; }
+.mark-icon { display: grid; place-items: center; width: 36px; height: 36px; color: white; background: #e76f51; border-radius: 11px; font-weight: 800; }
 .eyebrow { color: var(--bridge-cyan); font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; }
 .auth-panel { display: grid; place-items: center; padding: 32px; background: #f8fbfa; }
 .auth-card { width: min(100%, 430px); }

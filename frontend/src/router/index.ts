@@ -3,6 +3,7 @@ import Login from '@/Views/Login.vue'
 import Register from '@/Views/Register.vue'
 import Dashboard from '@/Views/Dashbord.vue'
 import Projects from '@/Views/Projects.vue'
+import ProjectDetail from '@/Views/ProjectDetail.vue'
 import TaskDetail from '@/Views/TaskDetail.vue'
 import Tasks from '@/Views/Task.vue'
 import TaskForm from '@/Views/TaskForm.vue'
@@ -60,6 +61,12 @@ const routes: RouteRecordRaw[] = [
     path: '/projects',
     name: 'projects',
     component: Projects,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/projects/:id',
+    name: 'project-detail',
+    component: ProjectDetail,
     meta: { requiresAuth: true }
   },
   {

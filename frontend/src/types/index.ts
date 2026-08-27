@@ -134,3 +134,15 @@ export interface RegisterRequest {
   password: string
   role: string
 }
+
+export interface ProjectAnalytics {
+  projectId: number
+  projectName: string
+  totalTasks: number
+  completed: number
+  inProgress: number
+  review: number
+  todo: number
+  avgClarity: number
+  resolutionDays: number
+}
