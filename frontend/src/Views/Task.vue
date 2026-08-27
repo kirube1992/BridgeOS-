@@ -62,51 +62,7 @@
         </div>
       </div>
 
-      <!-- Task List -->
-      <div v-else class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clarity</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="task in tasks"
-              :key="task.id"
-              @click="goToTask(task.id)"
-              class="hover:bg-gray-50 cursor-pointer transition"
-            >
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ task.title }}</div>
-                <div class="text-xs text-gray-500 truncate max-w-xs">{{ task.description }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <span class="inline-flex px-2 py-1 text-xs rounded-full" :class="statusClass(task.status)">
-                  {{ task.status }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="inline-flex px-2 py-1 text-xs rounded-full" :class="priorityClass(task.priority)">
-                  {{ task.priority }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ task.project?.name || '-' }}</td>
-              <td class="px-6 py-4 text-sm font-medium">
-                <span :class="task.clarityScore >= 80 ? 'text-green-600' : task.clarityScore >= 60 ? 'text-yellow-600' : 'text-red-600'">
-                  {{ task.clarityScore || 0 }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-500">{{ task.assignedTo?.name || 'Unassigned' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <KanbanBoard v-else />
     </div>
   </div>
 </template>
@@ -116,6 +72,7 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTaskStore } from '@/stores/task'
+import KanbanBoard from '@/Views/components/KanbanBoard.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -128,33 +85,9 @@ const error = computed(() => taskStore.error)
 
 const fetchTasks = () => taskStore.fetchTasks()
 
-const goToTask = (id: number) => {
-  router.push(`/tasks/${id}`)
-}
-
 const logout = () => {
   authStore.logout()
   router.push('/login')
-}
-
-const statusClass = (status: string) => {
-  const map: Record<string, string> = {
-    TODO: 'bg-gray-100 text-gray-700',
-    IN_PROGRESS: 'bg-blue-100 text-blue-700',
-    REVIEW: 'bg-purple-100 text-purple-700',
-    DONE: 'bg-green-100 text-green-700'
-  }
-  return map[status] || 'bg-gray-100 text-gray-700'
-}
-
-const priorityClass = (priority: string) => {
-  const map: Record<string, string> = {
-    LOW: 'bg-gray-100 text-gray-600',
-    MEDIUM: 'bg-yellow-100 text-yellow-700',
-    HIGH: 'bg-orange-100 text-orange-700',
-    URGENT: 'bg-red-100 text-red-700'
-  }
-  return map[priority] || 'bg-gray-100 text-gray-600'
 }
 
 onMounted(() => {
