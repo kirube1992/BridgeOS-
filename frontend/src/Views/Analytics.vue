@@ -13,6 +13,7 @@ const analytics = useAnalyticsStore()
 const projectStore = useProjectStore()
 const departments = ref<Department[]>([])
 const activePeriod = ref<'week' | 'month' | 'quarter'>(analytics.period)
+const activeMode = ref<'team' | 'project'>('team')
 const statusCounts = ref<Record<string, number>>({ TODO: 0, IN_PROGRESS: 0, REVIEW: 0, DONE: 0 })
 const locationCounts = ref({ Ethiopia: 0, China: 0 })
 
@@ -58,6 +59,10 @@ const changePeriod = async (period: typeof activePeriod.value): Promise<void> =>
   await loadData()
 }
 
+const changeMode = (mode: typeof activeMode.value): void => {
+  activeMode.value = mode
+}
+
 const handleDepartmentChange = async (event: Event): Promise<void> => {
   const value = (event.target as HTMLSelectElement).value
   analytics.departmentId = value ? Number(value) : null
@@ -66,7 +71,6 @@ const handleDepartmentChange = async (event: Event): Promise<void> => {
 
 const initials = (name: string): string => name.split(/\s+/).map(part => part[0] || '').join('').slice(0, 2).toUpperCase()
 const goToUser = (userId: number): void => { router.push(`/analytics/user/${userId}`) }
-const personalAnalyticsPath = computed(() => user.value?.id ? `/analytics/user/${user.value.id}` : '/analytics')
 const goToProject = (projectId: number): void => { router.push(`/projects/${projectId}`) }
 const completionPercent = (project: ProjectAnalytics): number => project.totalTasks ? Math.round((project.completed / project.totalTasks) * 100) : 0
 const completionClass = (project: ProjectAnalytics): string => {
@@ -104,18 +108,18 @@ onMounted(async () => {
     </nav>
 
     <main class="analytics-main">
-      <header class="page-header"><div><span class="eyebrow">Team performance</span><h1>Analytics</h1><p>A clear view of the work getting finished.</p></div><div class="header-controls"><div class="scope-switch" aria-label="Analytics scope"><a class="scope-option active" href="#project-analytics">Project</a><router-link class="scope-option" :to="personalAnalyticsPath">Personal</router-link></div><div class="period-switch"><button v-for="period in ['week', 'month', 'quarter']" :key="period" type="button" :class="{ active: activePeriod === period }" @click="changePeriod(period as typeof activePeriod)">{{ period }}</button></div></div></header>
+      <header class="page-header"><div><span class="eyebrow">{{ activeMode === 'team' ? 'Team performance' : 'Project performance' }}</span><h1>{{ activeMode === 'team' ? 'Team analytics' : 'Project analytics' }}</h1><p>{{ activeMode === 'team' ? 'A clear view of the work getting finished.' : 'A clear view of progress across every project.' }}</p></div><div class="header-controls"><div class="scope-switch" aria-label="Analytics view"><button class="scope-option" :class="{ active: activeMode === 'team' }" type="button" @click="changeMode('team')">Team</button><button class="scope-option" :class="{ active: activeMode === 'project' }" type="button" @click="changeMode('project')">Project</button></div><div class="period-switch"><button v-for="period in ['week', 'month', 'quarter']" :key="period" type="button" :class="{ active: activePeriod === period }" @click="changePeriod(period as typeof activePeriod)">{{ period }}</button></div></div></header>
 
       <div v-if="analytics.error" class="alert"><span>{{ analytics.error }}</span><button type="button" @click="loadData">Try again</button></div>
       <section class="stat-grid"><article v-for="stat in stats" :key="stat.label" class="stat-card"><span>{{ stat.label }}</span><strong>{{ stat.value }}<small>{{ stat.suffix }}</small></strong><em :class="trendClass(stat.trend)">{{ trendLabel(stat.trend) }}</em></article></section>
 
-      <div class="analytics-grid">
+      <div v-if="activeMode === 'team'" class="analytics-grid">
         <section class="leaderboard-panel"><header class="section-header"><div><span class="eyebrow">Ranked by output</span><h2>Leaderboard</h2></div><select :value="analytics.departmentId || ''" aria-label="Filter by department" @change="handleDepartmentChange"><option value="">All departments</option><option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option></select></header><div v-if="analytics.loading" class="state">Loading leaderboard...</div><div v-else-if="!analytics.leaderboard.length" class="state">No performance data for this period.</div><div v-else class="leaderboard"><button v-for="(entry, index) in analytics.leaderboard" :key="entry.user.id" class="leader-row" type="button" @click="goToUser(entry.user.id)"><span class="rank" :class="index < 3 ? `rank-${index + 1}` : ''">{{ index + 1 }}</span><span class="person-avatar">{{ initials(entry.user.name || entry.user.email) }}</span><span class="person"><strong>{{ entry.user.name || entry.user.email }}</strong><small>{{ entry.department?.name || entry.user.department?.name || 'Unassigned' }}</small></span><span class="metric"><strong>{{ entry.itemsResolved }}</strong><small>resolved</small></span><span class="metric"><strong>{{ entry.averageResolutionHours.toFixed(1) }}h</strong><small>avg. time</small></span><span class="metric"><strong>{{ entry.averageClarityScore.toFixed(0) }}</strong><small>clarity</small></span><span class="arrow" aria-hidden="true">→</span></button></div></section>
 
         <aside class="summary-panel"><header class="section-header"><div><span class="eyebrow">At a glance</span><h2>Team summary</h2></div></header><div class="summary-section"><h3>Workload by location</h3><div class="bar-row"><span>Ethiopia</span><b>{{ locationCounts.Ethiopia }}</b></div><div class="bar-track"><i :style="{ width: `${Math.min(100, locationCounts.Ethiopia * 10)}%` }"></i></div><div class="bar-row"><span>China</span><b>{{ locationCounts.China }}</b></div><div class="bar-track"><i :style="{ width: `${Math.min(100, locationCounts.China * 10)}%` }"></i></div></div><div class="summary-section"><h3>Status distribution</h3><div v-for="(count, status) in statusCounts" :key="status" class="status-row"><span>{{ status }}</span><b>{{ count }}</b></div></div><div class="summary-section"><h3>Department breakdown</h3><div v-for="department in departments" :key="department.id" class="status-row"><span>{{ department.name }}</span><b>{{ analytics.leaderboard.filter(entry => (entry.department?.id || entry.user.department?.id) === department.id).length }}</b></div><p v-if="!departments.length" class="muted">No departments available.</p></div></aside>
       </div>
 
-      <section id="project-analytics" class="projects-analytics">
+      <section v-else id="project-analytics" class="projects-analytics">
         <header class="section-header"><div><span class="eyebrow">Portfolio view</span><h2>Project analytics</h2></div><span class="period-note">{{ activePeriod }} view</span></header>
         <div v-if="analytics.loading && !analytics.projectAnalytics.length" class="state">Loading project analytics...</div>
         <div v-else-if="!analytics.projectAnalytics.length" class="state">No project analytics available.</div>
