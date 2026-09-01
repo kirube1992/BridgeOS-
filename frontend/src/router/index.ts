@@ -12,6 +12,12 @@ import Analytics from '@/Views/Analytics.vue'
 import UserAnalytics from '@/Views/UserAnalytics.vue'
 import UserProfile from '@/Views/UserProfile.vue'
 import People from '@/Views/People.vue'
+import AdminDepartments from '@/Views/AdminDepartments.vue'
+import AdminDepartmentDetail from '@/Views/AdminDepartmentDetail.vue'
+import WeeklyReport from '@/Views/WeeklyReport.vue'
+import AITools from '@/Views/AITools.vue'
+import CompanyAlliance from '@/Views/CompanyAlliance.vue'
+import CompanyProfile from '@/Views/CompanyProfile.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -82,6 +88,30 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/reports',
+    name: 'weekly-report',
+    component: WeeklyReport,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/ai',
+    name: 'ai-tools',
+    component: AITools,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/alliance',
+    name: 'company-alliance',
+    component: CompanyAlliance,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/company/:id',
+    name: 'company-profile',
+    component: CompanyProfile,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/analytics/user/:userId',
     name: 'user-analytics',
     component: UserAnalytics,
@@ -104,6 +134,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/admin/departments',
+    name: 'admin-departments',
+    component: AdminDepartments,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/departments/:id',
+    name: 'admin-department-detail',
+    component: AdminDepartmentDetail,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     redirect: '/login'
@@ -115,21 +157,22 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
 
-  // If route requires auth and user is not authenticated → redirect to login
   if (to.meta?.requiresAuth && !isAuthenticated) {
     return '/login'
   }
 
-  // If route is for guests (login/register) and user is authenticated → redirect to dashboard
   if (to.meta?.requiresGuest && isAuthenticated) {
     return '/dashboard'
   }
 
-  // ✅ ADD THIS: Allow navigation for all other routes
+  if (to.meta?.requiresAdmin && authStore.getUserRole !== 'ADMIN') {
+    return '/dashboard'
+  }
+
   return true
 })
 

@@ -28,9 +28,25 @@
         <span class="nav-icon">▥</span>
         <span>Analytics</span>
       </router-link>
+      <router-link to="/reports" class="nav-link">
+        <span class="nav-icon">▤</span>
+        <span>Weekly Report</span>
+      </router-link>
+      <router-link to="/ai" class="nav-link">
+        <span class="nav-icon">✦</span>
+        <span>AI Tools</span>
+      </router-link>
+      <router-link to="/alliance" class="nav-link">
+        <span class="nav-icon">⎔</span>
+        <span>The Alliance</span>
+      </router-link>
       <router-link to="/people" class="nav-link">
         <span class="nav-icon">◎</span>
         <span>People & Teams</span>
+      </router-link>
+      <router-link v-if="authStore.isAdmin" to="/admin/departments" class="nav-link">
+        <span class="nav-icon">▦</span>
+        <span>Departments</span>
       </router-link>
 
       <div class="side-bottom">
@@ -171,8 +187,6 @@ import type { Project, WorkItem, User } from '@/types'
 const router = useRouter()
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
-
-// ===== Auth =====
 const user = computed(() => authStore.user)
 const displayName = computed(() => {
   const name = user.value?.name?.trim()

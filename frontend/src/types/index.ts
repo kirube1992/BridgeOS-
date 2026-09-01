@@ -6,10 +6,25 @@ export interface User {
   department?: Department | null
 }
 
+export interface DepartmentMemberPreview {
+  id: number
+  name: string
+  email: string
+  role: string
+}
+
 export interface Department {
   id: number
   name: string
-  description: string
+  description?: string | null
+  defaultWorkFlow?: string | null
+  status?: 'ACTIVE' | 'INACTIVE' | 'active' | 'inactive'
+  departmentLead?: DepartmentMemberPreview | null
+  memberCount?: number
+  workItemCount?: number
+  members?: DepartmentMemberPreview[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Project {
@@ -145,4 +160,141 @@ export interface ProjectAnalytics {
   todo: number
   avgClarity: number
   resolutionDays: number
+}
+
+export interface WeeklyReportUser {
+  id: number
+  name: string
+  email: string
+}
+
+export interface WeeklyReportSummary {
+  tasksResolved: number
+  tasksCreated: number
+  avgClarityScore: number
+  completionRate: number
+  avgResolutionHours: number
+  rankInTeam: number
+  totalTeamResolved: number
+  teamAvgClarity: number
+}
+
+export interface WeeklyReportTrends {
+  clarityScores: number[]
+  resolvedByDay: number[]
+  createdByDay: number[]
+}
+
+export interface WeeklyReportTask {
+  id: number
+  title: string
+  status: string
+  completedAt: string
+}
+
+export interface WeeklyReportDecision {
+  id: number
+  summary: string
+  createdAt: string
+}
+
+export interface WeeklyReport {
+  weekStart: string
+  weekEnd: string
+  user: WeeklyReportUser
+  summary: WeeklyReportSummary
+  trends: WeeklyReportTrends
+  recentTasks: WeeklyReportTask[]
+  createdTasks?: WeeklyReportTask[]
+  recentDecisions: WeeklyReportDecision[]
+  availableWeeks?: string[]
+  emailOptIn?: boolean
+}
+
+export interface TeamWeeklyReportEntry {
+  user: WeeklyReportUser
+  summary: WeeklyReportSummary
+}
+
+export interface TeamWeeklyReport {
+  weekStart: string
+  weekEnd: string
+  totalTeamResolved: number
+  teamAvgClarity: number
+  members: TeamWeeklyReportEntry[]
+}
+
+export interface AiSuggestedAssignee {
+  id: number | null
+  name: string | null
+  confidence: number
+}
+
+export interface AiActionItem {
+  description: string
+  suggestedAssignee: AiSuggestedAssignee | null
+  suggestedDueDate: string | null
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  confirmed?: boolean
+  promotedId?: number
+  promoting?: boolean
+  editing?: boolean
+}
+
+export interface AiTranslateResponse {
+  originalText: string
+  whatToBuild: string
+  whyItMatters: string
+  acceptanceCriteria: string[]
+  edgeCases: string[]
+  technicalNotes: string
+  savedId?: number
+}
+
+export interface AiExtractMeetingResponse {
+  actionItems: AiActionItem[]
+}
+
+export interface AiAskContextItem {
+  type: string
+  id: number
+  summary: string
+}
+
+export interface AiAskSource {
+  type: string
+  id: number
+  summary: string
+}
+
+export interface AiAskResponse {
+  question: string
+  answer: string
+  sources: AiAskSource[]
+}
+
+export interface AiHealthResponse {
+  status: string
+  provider: string
+  model?: string | null
+  sidecarReachable: boolean
+}
+
+export interface RequirementTranslationEntity {
+  id: number
+  originalText: string
+  whatToBuild: string
+  whyItMatters: string
+  acceptanceCriteria: string
+  edgeCases: string
+  technicalNotes: string
+  createdAt: string
+}
+
+export interface AiChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  sources?: AiAskSource[]
+  timestamp: string
 }

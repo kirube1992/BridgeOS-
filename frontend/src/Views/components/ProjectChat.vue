@@ -12,9 +12,15 @@ interface Sender {
 
 interface ChatMessage {
   id: number
-  content: string
+  message: string
   createdAt: string
   sender: Sender
+}
+
+interface PagedChatResponse {
+  content: ChatMessage[]
+  totalPages: number
+  totalElements: number
 }
 
 const props = defineProps<{
@@ -27,12 +33,17 @@ const currentUser = computed(() => authStore.user)
 const messages = ref<ChatMessage[]>([])
 const newMessageContent = ref('')
 const loading = ref(true)
+const sending = ref(false)
+const loadingMore = ref(false)
 const error = ref('')
+const currentPage = ref(0)
+const totalPages = ref(0)
 const messageContainer = ref<HTMLDivElement | null>(null)
 
 let sseSource: EventSource | null = null
 
-// Formats initials from the name
+const hasMoreMessages = computed(() => currentPage.value + 1 < totalPages.value)
+
 const getInitials = (name: string) => {
   if (!name) return '?'
   const parts = name.trim().split(/\s+/)
@@ -46,9 +57,15 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase()
 }
 
-// Scans timestamps to format them cleanly
 const formatTimestamp = (dateStr: string) => {
   const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins} min ago`
+
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
@@ -58,14 +75,13 @@ const formatTimestamp = (dateStr: string) => {
 
   if (date.toDateString() === today.toDateString()) {
     return `Today at ${time}`
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return `Yesterday at ${time}`
-  } else {
-    return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at ${time}`
   }
+  if (date.toDateString() === yesterday.toDateString()) {
+    return `Yesterday at ${time}`
+  }
+  return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at ${time}`
 }
 
-// Automatically scrolls the message panel to the bottom
 const scrollToBottom = async () => {
   await nextTick()
   if (messageContainer.value) {
@@ -73,23 +89,58 @@ const scrollToBottom = async () => {
   }
 }
 
-// Fetches initial message history
-const fetchHistory = async () => {
+const addMessage = (message: ChatMessage) => {
+  if (!messages.value.some((m) => m.id === message.id)) {
+    messages.value.push(message)
+  }
+}
+
+const fetchHistory = async (page = 0, append = false) => {
   try {
-    loading.value = true
+    if (append) {
+      loadingMore.value = true
+    } else {
+      loading.value = true
+    }
     error.value = ''
-    const response = await api.get<ChatMessage[]>(`/projects/${props.projectId}/messages`)
-    messages.value = response.data
-    scrollToBottom()
-  } catch (err: any) {
+
+    const response = await api.get<PagedChatResponse>(
+      `/projects/${props.projectId}/messages`,
+      { params: { page, size: 50 } }
+    )
+
+    const { content, totalPages: pages } = response.data
+    currentPage.value = page
+    totalPages.value = pages
+
+    if (append) {
+      const container = messageContainer.value
+      const previousHeight = container?.scrollHeight ?? 0
+      const older = content.filter((m) => !messages.value.some((existing) => existing.id === m.id))
+      messages.value = [...older, ...messages.value]
+
+      await nextTick()
+      if (container) {
+        container.scrollTop = container.scrollHeight - previousHeight
+      }
+    } else {
+      messages.value = content
+      scrollToBottom()
+    }
+  } catch (err: unknown) {
     console.error('Failed to load chat history:', err)
     error.value = 'Failed to load chat history.'
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
-// Connects to SseEmitter stream
+const loadMoreMessages = () => {
+  if (!hasMoreMessages.value || loadingMore.value) return
+  fetchHistory(currentPage.value + 1, true)
+}
+
 const connectSSE = () => {
   if (sseSource) {
     sseSource.close()
@@ -98,56 +149,58 @@ const connectSSE = () => {
   const token = authStore.token
   if (!token) return
 
-  // Standard EventSource connection passing token as query parameter
   const streamUrl = `/api/projects/${props.projectId}/messages/stream?token=${encodeURIComponent(token)}`
   sseSource = new EventSource(streamUrl)
 
   sseSource.addEventListener('message', (event) => {
     try {
       const message: ChatMessage = JSON.parse(event.data)
-      // Check if message is already in list (avoid duplicates if POST API responds before SSE fires)
-      if (!messages.value.some((m) => m.id === message.id)) {
-        messages.value.push(message)
-        scrollToBottom()
-      }
+      addMessage(message)
+      scrollToBottom()
     } catch (err) {
       console.error('Failed to parse SSE chat message:', err)
     }
   })
 
   sseSource.onerror = (err) => {
-    console.warn('SSE Connection error, attempting reconnection...', err)
-    // SseEmitter automatically reconnects in modern browsers, but we log it
+    console.warn('SSE connection error:', err)
   }
 }
 
-// Sends a message
 const sendMessage = async () => {
   const content = newMessageContent.value.trim()
-  if (!content) return
+  if (!content || sending.value) return
 
   newMessageContent.value = ''
+  sending.value = true
   try {
     const response = await api.post<ChatMessage>(`/projects/${props.projectId}/messages`, {
       content
     })
-    const saved = response.data
-    // Prevent duplicate insertion if SSE fires immediately
-    if (!messages.value.some((m) => m.id === saved.id)) {
-      messages.value.push(saved)
-      scrollToBottom()
-    }
-  } catch (err: any) {
+    addMessage(response.data)
+    scrollToBottom()
+  } catch (err: unknown) {
     console.error('Failed to send message:', err)
-    alert(err.response?.data?.message || 'Failed to send message. Please try again.')
+    newMessageContent.value = content
+    const message =
+      (err as { response?: { data?: { message?: string } } }).response?.data?.message ||
+      'Failed to send message. Please try again.'
+    alert(message)
+  } finally {
+    sending.value = false
   }
 }
 
-// Setup/Teardown logic
-watch(() => props.projectId, () => {
-  fetchHistory()
-  connectSSE()
-})
+watch(
+  () => props.projectId,
+  () => {
+    messages.value = []
+    currentPage.value = 0
+    totalPages.value = 0
+    fetchHistory()
+    connectSSE()
+  }
+)
 
 onMounted(() => {
   fetchHistory()
@@ -171,64 +224,81 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Message List -->
     <div ref="messageContainer" class="chat-body">
       <div v-if="loading" class="chat-state">
         <p>Loading conversation history...</p>
       </div>
       <div v-else-if="error" class="chat-state chat-error">
         <p>{{ error }}</p>
-        <button type="button" @click="fetchHistory">Retry</button>
+        <button type="button" @click="fetchHistory()">Retry</button>
       </div>
       <div v-else-if="!messages.length" class="chat-state chat-empty">
         <div class="empty-icon">💬</div>
         <strong>No messages yet</strong>
-        <p>Be the first to share context on this project!</p>
+        <p>Start the conversation!</p>
       </div>
       <div v-else class="messages-list">
-        <div 
-          v-for="msg in messages" 
-          :key="msg.id" 
-          class="message-wrapper"
-          :class="{ 'self': msg.sender?.id === currentUser?.id }"
+        <button
+          v-if="hasMoreMessages"
+          type="button"
+          class="load-more-btn"
+          :disabled="loadingMore"
+          @click="loadMoreMessages"
         >
-          <!-- Sender Initials Avatar (only for others) -->
-          <div v-if="msg.sender?.id !== currentUser?.id" class="chat-avatar" :title="msg.sender?.role">
+          {{ loadingMore ? 'Loading...' : 'Load older messages' }}
+        </button>
+
+        <div
+          v-for="msg in messages"
+          :key="msg.id"
+          class="message-wrapper"
+          :class="{ self: msg.sender?.id === currentUser?.id }"
+        >
+          <div class="chat-avatar" :title="msg.sender?.role">
             {{ getInitials(msg.sender?.name || '') }}
           </div>
 
           <div class="message-content-wrapper">
             <div class="message-info">
               <span class="sender-name">{{ msg.sender?.name }}</span>
-              <span class="sender-role" v-if="msg.sender?.role">· {{ msg.sender?.role }}</span>
+              <span v-if="msg.sender?.role" class="sender-role">· {{ msg.sender.role }}</span>
               <span class="message-time">{{ formatTimestamp(msg.createdAt) }}</span>
             </div>
             <div class="message-bubble">
-              {{ msg.content }}
+              {{ msg.message }}
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Input Footer -->
-    <form @submit.prevent="sendMessage" class="chat-footer">
-      <input 
+    <form class="chat-footer" @submit.prevent="sendMessage">
+      <input
         v-model="newMessageContent"
-        type="text" 
-        placeholder="Type a message, press Enter to send..."
+        type="text"
+        placeholder="Type a message..."
         class="chat-input"
-        maxLength="1000"
+        maxlength="1000"
+        :disabled="sending"
         @keydown.enter.prevent="sendMessage"
       />
-      <button 
-        type="submit" 
-        class="send-btn" 
-        :disabled="!newMessageContent.trim()"
+      <button
+        type="submit"
+        class="send-btn"
+        :disabled="!newMessageContent.trim() || sending"
+        :aria-label="sending ? 'Sending message' : 'Send message'"
       >
-        <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        <span v-if="sending" class="send-spinner" />
+        <svg
+          v-else
+          class="send-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
         </svg>
       </button>
     </form>
@@ -309,6 +379,7 @@ onUnmounted(() => {
   background: #fff3ef;
   font-weight: 800;
   font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .chat-empty .empty-icon {
@@ -330,6 +401,28 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.load-more-btn {
+  align-self: center;
+  border: 1px solid var(--bridge-line);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--bridge-muted);
+  background: white;
+  cursor: pointer;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  color: var(--bridge-ink);
+  border-color: var(--bridge-cyan);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .message-wrapper {
@@ -359,6 +452,11 @@ onUnmounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.message-wrapper.self .chat-avatar {
+  background: var(--bridge-menu);
+  color: white;
+}
+
 .message-content-wrapper {
   display: flex;
   flex-direction: column;
@@ -379,10 +477,7 @@ onUnmounted(() => {
   color: var(--bridge-deep);
 }
 
-.message-wrapper.self .sender-name {
-  display: none; /* Hide self name to keep it clean */
-}
-
+.message-wrapper.self .sender-name,
 .message-wrapper.self .sender-role {
   display: none;
 }
@@ -437,6 +532,10 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px rgba(93, 204, 229, 0.15);
 }
 
+.chat-input:disabled {
+  opacity: 0.6;
+}
+
 .send-btn {
   display: flex;
   align-items: center;
@@ -448,6 +547,7 @@ onUnmounted(() => {
   color: white;
   background: var(--bridge-menu);
   transition: background 0.2s, transform 0.1s;
+  cursor: pointer;
 }
 
 .send-btn:hover:not(:disabled) {
@@ -463,5 +563,20 @@ onUnmounted(() => {
   width: 15px;
   height: 15px;
   transform: translate(-1px, 1px);
+}
+
+.send-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

@@ -105,71 +105,79 @@
 
       <!-- Projects Grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
+        <article
           v-for="project in filteredProjects"
           :key="project.id"
-          class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition p-6"
+          class="project-card bg-white rounded-xl border border-gray-200 hover:shadow-lg transition"
         >
-          <div class="flex items-start justify-between">
-            <div class="flex-1 min-w-0">
-              <h3 class="text-lg font-semibold text-gray-900 truncate">
-                {{ project.name }}
-              </h3>
-              <p class="text-sm text-gray-500 mt-1 line-clamp-2">
-                {{ project.description || 'No description' }}
+          <router-link
+            :to="`/projects/${project.id}`"
+            class="project-card-link block p-6"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-900 truncate group-hover:text-[var(--bridge-deep)]">
+                  {{ project.name }}
+                </h3>
+                <p class="text-sm text-gray-500 mt-1 line-clamp-2">
+                  {{ project.description || 'No description' }}
+                </p>
+              </div>
+              <span class="project-id-chip">#{{ project.id }}</span>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                :class="{
+                  'bg-green-100 text-green-700': project.status === 'ACTIVE',
+                  'bg-yellow-100 text-yellow-700': project.status === 'ON_HOLD',
+                  'bg-blue-100 text-blue-700': project.status === 'COMPLETED',
+                  'bg-gray-100 text-gray-600': project.status === 'ARCHIVED'
+                }"
+              >
+                {{ project.status }}
+              </span>
+              <span v-if="project.deadline" class="text-xs text-gray-400">
+                Due: {{ formatDate(project.deadline) }}
+              </span>
+            </div>
+
+            <div v-if="project.clientContext" class="mt-3">
+              <p class="text-xs text-gray-500 line-clamp-2">
+                <span class="font-medium">Context:</span> {{ project.clientContext }}
               </p>
             </div>
-            <div class="flex space-x-1 ml-2 flex-shrink-0">
-              <button
-                @click="openEditModal(project)"
-                class="p-1.5 text-gray-400 hover:text-[var(--bridge-deep)] rounded-lg hover:bg-[var(--bridge-cyan-soft)] transition"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-              </button>
-              <button
-                @click="handleDelete(project.id)"
-                class="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-              </button>
+
+            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+              <span>Created: {{ formatDate(project.createdAt) }}</span>
+              <span class="open-project-link">Open project →</span>
             </div>
-          </div>
+          </router-link>
 
-          <!-- Status Badge -->
-          <div class="mt-3 flex flex-wrap items-center gap-2">
-            <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              :class="{
-                'bg-green-100 text-green-700': project.status === 'ACTIVE',
-                'bg-yellow-100 text-yellow-700': project.status === 'ON_HOLD',
-                'bg-blue-100 text-blue-700': project.status === 'COMPLETED',
-                'bg-gray-100 text-gray-600': project.status === 'ARCHIVED'
-              }"
+          <div class="project-card-actions flex justify-end gap-1 px-4 pb-4 -mt-2">
+            <button
+              type="button"
+              @click="openEditModal(project)"
+              class="p-1.5 text-gray-400 hover:text-[var(--bridge-deep)] rounded-lg hover:bg-[var(--bridge-cyan-soft)] transition"
+              aria-label="Edit project"
             >
-              {{ project.status }}
-            </span>
-            <span v-if="project.deadline" class="text-xs text-gray-400">
-              Due: {{ formatDate(project.deadline) }}
-            </span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              @click="handleDelete(project.id)"
+              class="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition"
+              aria-label="Delete project"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
           </div>
-
-          <!-- Client Context Preview -->
-          <div v-if="project.clientContext" class="mt-3">
-            <p class="text-xs text-gray-500 line-clamp-2">
-              <span class="font-medium">Context:</span> {{ project.clientContext }}
-            </p>
-          </div>
-
-          <!-- Footer -->
-          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-            <span>Created: {{ formatDate(project.createdAt) }}</span>
-            <span>By: {{ project.createdBy?.name || 'Unknown' }}</span>
-          </div>
-        </div>
+        </article>
       </div>
     </div>
 
@@ -269,3 +277,30 @@ onMounted(() => {
   fetchProjects()
 })
 </script>
+
+<style scoped>
+.project-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.project-card-link:hover .open-project-link {
+  color: var(--bridge-deep);
+}
+
+.project-id-chip {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--bridge-muted);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.open-project-link {
+  font-weight: 700;
+  color: var(--bridge-menu);
+}
+</style>
