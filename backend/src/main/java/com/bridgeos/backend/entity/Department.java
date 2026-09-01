@@ -34,6 +34,14 @@ public class Department {
     @Column(name="default_work_flow")
     private String defaultWorkFlow;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ACTIVE'")
+    private DepartmentStatus status = DepartmentStatus.ACTIVE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_lead_id")
+    private User departmentLead;
+
     @Column(name="created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

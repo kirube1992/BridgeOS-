@@ -32,4 +32,7 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Column(name = "weekly_report_email_opt_in", nullable = false, columnDefinition = "boolean default false")
+    private boolean weeklyReportEmailOptIn = false;
 }

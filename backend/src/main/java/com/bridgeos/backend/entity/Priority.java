@@ -1,6 +1,6 @@
 package com.bridgeos.backend.entity;
 
-enum Priority {
+public enum Priority {
     HIGH,
     LOW,
     MEDIUM,

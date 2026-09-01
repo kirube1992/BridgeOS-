@@ -41,9 +41,9 @@ public class WorkItemService {
 
 
         if(departmentId != null) {
-            workItem.setDepartment(departmentService.getDepartmentById(departmentId));
+            workItem.setDepartment(departmentService.getDepartmentEntity(departmentId));
         } else {
-            workItem.setDepartment(departmentService.getDepartmentById(1l));
+            workItem.setDepartment(departmentService.getDepartmentEntity(1L));
         }
 
         if(workItem.getCreatedAt() == null){

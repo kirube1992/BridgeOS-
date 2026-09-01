@@ -9,7 +9,6 @@ import com.bridgeos.backend.entity.WorkItem;
 import com.bridgeos.backend.entity.WorkItemStatus;
 import com.bridgeos.backend.repository.ProjectRepository;
 import com.bridgeos.backend.repository.WorkItemRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -42,6 +42,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     public User updateUser(Long id,User updatedUser) {
         User existingUser = getUserById(id);
         existingUser.setName(updatedUser.getName());

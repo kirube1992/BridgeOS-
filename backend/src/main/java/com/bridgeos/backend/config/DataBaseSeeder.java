@@ -51,40 +51,49 @@ public class DataBaseSeeder  implements CommandLineRunner {
             log.info("Departments seeded successfully!");
         }
 
-        if(projectRepository.count() == 0) {
-            log.info("seeding default project...");
+        User user = userRepository.findById(1L).orElse(null);
+        if (user != null) {
+            Project primaryProject = null;
 
-            User user  = userRepository.findById(1l).orElse(null);
-
-            if(user != null){
+            if (!projectRepository.existsByName("BridgeOS Development")) {
+                log.info("Seeding project: BridgeOS Development");
                 Project project = new Project();
                 project.setName("BridgeOS Development");
                 project.setDescription("Main project for BridgeOS platform");
+                project.setClientContext("Internal platform rollout for Ethiopia-China teams");
                 project.setCreatedBy(user);
                 project.setProjectManager(user);
-                project = projectRepository.save(project);
+                primaryProject = projectRepository.save(project);
+            }
 
+            if (!projectRepository.existsByName("Cross-Border Logistics Pilot")) {
+                log.info("Seeding project: Cross-Border Logistics Pilot");
+                Project project = new Project();
+                project.setName("Cross-Border Logistics Pilot");
+                project.setDescription("Pilot rollout for shipment tracking and customs coordination");
+                project.setClientContext("Partner logistics firm expanding Addis Ababa to Guangzhou routes");
+                project.setCreatedBy(user);
+                project.setProjectManager(user);
+                projectRepository.save(project);
+            }
 
-            if(workItemService.getAllWorkItem().isEmpty()) {
+            if (primaryProject != null && workItemService.getAllWorkItem().isEmpty()) {
                 WorkItem workItem = new WorkItem();
                 workItem.setTitle("Build authentication system");
                 workItem.setDescription("Implement JWT-based authentication");
                 workItem.setBusinessContextNotes("Users need to securely login to access BridgeOS features");
                 workItem.setAcceptanceCriteria("- Users can register\n- Users can login\n- JWT tokens work");
-
                 workItem.setStatus(WorkItemStatus.TODO);
 
                 workItemService.createWorkItem(
                         workItem,
-                        project.getId(),
+                        primaryProject.getId(),
                         user.getId(),
                         user.getId(),
                         null
                 );
 
                 log.info("Sample work item seeded!");
-            }
-
             }
         }
 

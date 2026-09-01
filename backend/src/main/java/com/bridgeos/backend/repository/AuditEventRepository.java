@@ -36,6 +36,8 @@ public interface AuditEventRepository extends JpaRepository<AuditEvent, Long> {
     List<AuditEvent> searchByKeyword(String keyword);
 
     List<AuditEvent> findByProjectIdAndCreatedAtBetween(Long projectId, LocalDateTime start, LocalDateTime end);
+
+    List<AuditEvent> findByActorIdAndCreatedAtBetween(Long actorId, LocalDateTime start, LocalDateTime end);
 }
 
 

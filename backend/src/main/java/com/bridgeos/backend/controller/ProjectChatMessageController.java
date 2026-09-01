@@ -1,5 +1,7 @@
 package com.bridgeos.backend.controller;
 
+import com.bridgeos.backend.DTO.ChatMessageResponse;
+import com.bridgeos.backend.DTO.PagedChatResponse;
 import com.bridgeos.backend.entity.Project;
 import com.bridgeos.backend.entity.ProjectChatMessage;
 import com.bridgeos.backend.entity.User;
@@ -8,17 +10,26 @@ import com.bridgeos.backend.service.ProjectService;
 import com.bridgeos.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/messages")
@@ -30,26 +41,47 @@ public class ProjectChatMessageController {
     private final ProjectService projectService;
     private final UserService userService;
 
-    // ConcurrentMap of registered SseEmitters per Project ID
     private static final Map<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
-    // GET /api/projects/{projectId}/messages
     @GetMapping
-    public ResponseEntity<List<ProjectChatMessage>> getChatHistory(@PathVariable Long projectId) {
-        log.info("GET /api/projects/{}/messages - Fetching chat history", projectId);
-        // Verify project exists
+    public ResponseEntity<PagedChatResponse> getChatHistory(
+            @PathVariable Long projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        log.info("GET /api/projects/{}/messages - page={}, size={}", projectId, page, size);
         projectService.getProjectById(projectId);
-        List<ProjectChatMessage> history = chatRepository.findByProjectIdOrderByCreatedAtAsc(projectId);
-        return ResponseEntity.ok(history);
+
+        Page<ProjectChatMessage> result = chatRepository.findByProjectIdOrderByCreatedAtDesc(
+                projectId,
+                PageRequest.of(page, size)
+        );
+
+        List<ChatMessageResponse> content = result.getContent().stream()
+                .map(ChatMessageResponse::from)
+                .sorted(Comparator.comparing(ChatMessageResponse::getCreatedAt))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new PagedChatResponse(
+                content,
+                result.getTotalPages(),
+                result.getTotalElements()
+        ));
     }
 
-    // POST /api/projects/{projectId}/messages
     @PostMapping
-    public ResponseEntity<ProjectChatMessage> sendMessage(
+    public ResponseEntity<ChatMessageResponse> sendMessage(
             @PathVariable Long projectId,
             @RequestBody MessageRequest request,
             Principal principal) {
         log.info("POST /api/projects/{}/messages - Sending new message", projectId);
+
+        String content = request.getContent();
+        if (content == null || content.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message content cannot be empty");
+        }
+        if (content.length() > 1000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message content cannot exceed 1000 characters");
+        }
 
         Project project = projectService.getProjectById(projectId);
         User sender = userService.getUserByEmail(principal.getName());
@@ -57,30 +89,26 @@ public class ProjectChatMessageController {
         ProjectChatMessage message = new ProjectChatMessage();
         message.setProject(project);
         message.setSender(sender);
-        message.setContent(request.getContent());
+        message.setContent(content.trim());
         message.setCreatedAt(LocalDateTime.now());
 
         ProjectChatMessage saved = chatRepository.save(message);
+        ChatMessageResponse response = ChatMessageResponse.from(saved);
 
-        // Broadcast to all emitters listening to this project
-        broadcastMessage(projectId, saved);
+        broadcastMessage(projectId, response);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(response);
     }
 
-    // GET /api/projects/{projectId}/messages/stream
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamMessages(@PathVariable Long projectId) {
         log.info("GET /api/projects/{}/messages/stream - Creating new SSE connection", projectId);
+        projectService.getProjectById(projectId);
 
-        // 30 minutes timeout
         SseEmitter emitter = new SseEmitter(1800000L);
 
-        // Initialize emitter list for project if not present
-        emitters.computeIfAbsent(projectId, k -> new ArrayList<>());
-        emitters.get(projectId).add(emitter);
+        emitters.computeIfAbsent(projectId, k -> new CopyOnWriteArrayList<>()).add(emitter);
 
-        // Send dummy connection established event to avoid browser connection timeout issues
         try {
             emitter.send(SseEmitter.event().name("init").data("Connected to Project " + projectId));
         } catch (IOException e) {
@@ -105,7 +133,7 @@ public class ProjectChatMessageController {
         }
     }
 
-    private void broadcastMessage(Long projectId, ProjectChatMessage message) {
+    private void broadcastMessage(Long projectId, ChatMessageResponse message) {
         List<SseEmitter> projectEmitters = emitters.get(projectId);
         if (projectEmitters == null || projectEmitters.isEmpty()) {
             return;

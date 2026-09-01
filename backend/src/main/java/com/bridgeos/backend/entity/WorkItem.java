@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.util.Lazy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,7 +32,7 @@ public class WorkItem {
     private String businessContextNotes;
 
     @Column(name = "acceptance_criteria", length = 1000)
-    private String AcceptanceCriteria;
+    private String acceptanceCriteria;
 
     @Column(name= "clarity_score")
     private Integer clarityScore;
@@ -69,6 +68,6 @@ public class WorkItem {
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", nullable = false)
+    @JoinColumn(name = "department_id")
     private Department department;
 }
