@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAiStore } from '@/stores/ai'
 import type { Project } from '@/types'
 
@@ -13,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const ai = useAiStore()
+const { locale } = useI18n()
 
 const inputText = ref('')
 const editing = reactive({
@@ -71,7 +73,10 @@ const doTranslate = async () => {
     error.value = 'Please write at least a few words describing the requirement.'
     return
   }
-  const result = await ai.translate(text, props.project?.id)
+
+  const localizedText = await ai.translateText(text, (locale.value as 'en' | 'zh') || 'en')
+  const sourceText = localizedText.success && localizedText.data?.translatedText ? localizedText.data.translatedText : text
+  const result = await ai.translate(sourceText, props.project?.id)
   if (!result.success) {
     error.value = result.error || 'Translation failed.'
     return

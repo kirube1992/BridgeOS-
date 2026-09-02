@@ -101,7 +101,6 @@ const onProjectChange = () => {
       <router-link to="/reports" class="nav-link"><span class="nav-icon">▤</span><span>Weekly Report</span></router-link>
       <router-link to="/people" class="nav-link"><span class="nav-icon">◎</span><span>People & Teams</span></router-link>
       <router-link to="/ai" class="nav-link active"><span class="nav-icon">✦</span><span>AI Tools</span></router-link>
-      <router-link to="/alliance" class="nav-link"><span class="nav-icon">⎔</span><span>The Alliance</span></router-link>
 
       <div class="side-bottom">
         <router-link :to="`/profile/${user?.id || ''}`" class="profile-row">

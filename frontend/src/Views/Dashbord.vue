@@ -7,46 +7,42 @@
         <span>BridgeOS</span>
       </div>
 
-      <div class="nav-label">WORKSPACE</div>
+      <div class="nav-label">{{ t('dashboard.workspace').toUpperCase() }}</div>
       <a class="nav-link active" href="#overview">
         <span class="nav-icon">◈</span>
-        <span>Overview</span>
+        <span>{{ t('dashboard.overview') }}</span>
       </a>
       <router-link to="/tasks" class="nav-link">
         <span class="nav-icon">□</span>
-        <span>My Tasks</span>
+        <span>{{ t('dashboard.myTasks') }}</span>
       </router-link>
       <router-link to="/projects" class="nav-link">
         <span class="nav-icon">⌘</span>
-        <span>Projects</span>
+        <span>{{ t('dashboard.projects') }}</span>
       </router-link>
       <router-link to="/decisions" class="nav-link">
         <span class="nav-icon">◌</span>
-        <span>Decisions</span>
+        <span>{{ t('dashboard.decisions') || 'Decisions' }}</span>
       </router-link>
       <router-link to="/analytics" class="nav-link">
         <span class="nav-icon">▥</span>
-        <span>Analytics</span>
+        <span>{{ t('dashboard.analytics') || 'Analytics' }}</span>
       </router-link>
       <router-link to="/reports" class="nav-link">
         <span class="nav-icon">▤</span>
-        <span>Weekly Report</span>
+        <span>{{ t('dashboard.reports') || 'Weekly Report' }}</span>
       </router-link>
       <router-link to="/ai" class="nav-link">
         <span class="nav-icon">✦</span>
-        <span>AI Tools</span>
-      </router-link>
-      <router-link to="/alliance" class="nav-link">
-        <span class="nav-icon">⎔</span>
-        <span>The Alliance</span>
+        <span>{{ t('dashboard.aiTools') || 'AI Tools' }}</span>
       </router-link>
       <router-link to="/people" class="nav-link">
         <span class="nav-icon">◎</span>
-        <span>People & Teams</span>
+        <span>{{ t('dashboard.people') }}</span>
       </router-link>
       <router-link v-if="authStore.isAdmin" to="/admin/departments" class="nav-link">
         <span class="nav-icon">▦</span>
-        <span>Departments</span>
+        <span>{{ t('dashboard.departments') || 'Departments' }}</span>
       </router-link>
 
       <div class="side-bottom">
@@ -57,7 +53,7 @@
             <small>{{ user?.role || 'Team Member' }}</small>
           </div>
         </router-link>
-        <button class="logout-button" type="button" @click="logout">Log out / 退出</button>
+        <button class="logout-button" type="button" @click="logout">{{ t('dashboard.logout') }}</button>
       </div>
     </aside>
 
@@ -67,16 +63,16 @@
       <header class="topbar">
         <div>
           <div class="date-chip">{{ today }}</div>
-          <h1>Good morning, {{ displayName }}.</h1>
+          <h1>{{ t('dashboard.greeting', { name: displayName }) }}</h1>
         </div>
         <div class="topbar-actions">
           <button class="refresh-button" type="button" :disabled="loading" @click="fetchDashboardData">
-            {{ loading ? 'Loading...' : '↻ Refresh' }}
+            {{ loading ? t('dashboard.loading') : '↻ ' + t('dashboard.refresh') }}
           </button>
           <div class="locale-toggle">
-            <button class="locale-btn" :class="{ active: locale === 'en' }" @click="changeLocale('en')">English</button>
+            <button class="locale-btn" :class="{ active: locale === 'en' }" @click="changeLocale('en')">{{ t('language.english') }}</button>
             <span class="divider">·</span>
-            <button class="locale-btn" :class="{ active: locale === 'zh' }" @click="changeLocale('zh')">中文</button>
+            <button class="locale-btn" :class="{ active: locale === 'zh' }" @click="changeLocale('zh')">{{ t('language.chinese') }}</button>
           </div>
         </div>
       </header>
@@ -84,26 +80,26 @@
       <!-- Stats -->
       <section class="stat-grid">
         <article class="stat-card">
-          <span>Active projects / 活跃项目</span>
+          <span>{{ t('dashboard.activeProjects') }}</span>
           <strong>{{ activeProjectCount }}</strong>
-          <em>{{ projectCount }} total projects</em>
+          <em>{{ t('dashboard.totalProjects', { count: projectCount }) }}</em>
         </article>
         <article class="stat-card">
-          <span>Open tasks / 待处理任务</span>
+          <span>{{ t('dashboard.openTasks') }}</span>
           <strong>{{ taskCount }}</strong>
-          <em>{{ taskCount }} open tasks</em>
+          <em>{{ t('dashboard.openTaskSummary', { count: taskCount }) }}</em>
         </article>
         <article class="stat-card">
-          <span>Team members / 团队成员</span>
+          <span>{{ t('dashboard.teamMembers') }}</span>
           <strong>{{ userCount }}</strong>
-          <em>Live team directory</em>
+          <em>{{ t('dashboard.teamSummary') }}</em>
         </article>
       </section>
 
       <!-- Error Alert -->
       <div v-if="errorMessage" class="dashboard-alert">
         <span>{{ errorMessage }}</span>
-        <button type="button" @click="fetchDashboardData">Try again</button>
+        <button type="button" @click="fetchDashboardData">{{ t('dashboard.retry') }}</button>
       </div>
 
       <!-- Work Queue & Team Pulse -->
@@ -112,14 +108,14 @@
         <section class="panel" id="tasks">
           <header class="panel-header">
             <div>
-              <h2>Work queue / 工作队列</h2>
-              <p>Shared priorities, clear next steps.</p>
+              <h2>{{ t('dashboard.queueTitle') }}</h2>
+              <p>{{ t('dashboard.queueDescription') }}</p>
             </div>
-            <router-link to="/tasks/new" class="add-button">+ Add task</router-link>
+            <router-link to="/tasks/new" class="add-button">{{ t('dashboard.addTask') }}</router-link>
           </header>
 
-          <div v-if="loading" class="panel-state">Loading tasks...</div>
-          <div v-else-if="!taskRows.length" class="panel-state">No recent tasks found.</div>
+          <div v-if="loading" class="panel-state">{{ t('dashboard.loadingTasks') }}</div>
+          <div v-else-if="!taskRows.length" class="panel-state">{{ t('dashboard.noTasks') }}</div>
           <div v-else class="task-list">
             <article v-for="task in taskRows" :key="task.id" class="task-row">
               <span class="task-dot" :class="task.tone"></span>
@@ -136,13 +132,13 @@
         <aside class="panel" id="people">
           <header class="panel-header">
             <div>
-              <h2>Team pulse / 团队动态</h2>
-              <p>Workload by location</p>
+              <h2>{{ t('dashboard.pulseTitle') }}</h2>
+              <p>{{ t('dashboard.pulseDescription') }}</p>
             </div>
           </header>
 
-          <div v-if="loading" class="panel-state">Loading team...</div>
-          <div v-else-if="!teamMembers.length" class="panel-state">No team members found.</div>
+          <div v-if="loading" class="panel-state">{{ t('dashboard.loadingTeam') }}</div>
+          <div v-else-if="!teamMembers.length" class="panel-state">{{ t('dashboard.noMembers') }}</div>
           <div v-else class="side-panel-body">
             <div class="member-list">
               <div v-for="member in visibleMembers" :key="member.id" class="member-row">
@@ -160,12 +156,12 @@
             <div class="location-stats">
               <div class="location-item">
                 <span class="flag">🇪🇹</span>
-                <span>Ethiopia</span>
+                <span>{{ t('dashboard.ethiopia') }}</span>
                 <span class="count">{{ ethiopiaCount }}</span>
               </div>
               <div class="location-item">
                 <span class="flag">🇨🇳</span>
-                <span>China</span>
+                <span>{{ t('dashboard.china') }}</span>
                 <span class="count">{{ chinaCount }}</span>
               </div>
             </div>
@@ -178,15 +174,18 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/project'
+import { setLocale, type Locale } from '@/i18n'
 import api from '@/API/index'
 import type { Project, WorkItem, User } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
+const { t, locale: i18nLocale } = useI18n()
 const user = computed(() => authStore.user)
 const displayName = computed(() => {
   const name = user.value?.name?.trim()
@@ -200,10 +199,12 @@ const initials = computed(() => {
 })
 
 // ===== Locale =====
-const locale = ref<'en' | 'zh'>('en')
-const changeLocale = (lang: 'en' | 'zh') => {
-  locale.value = lang
-  // In a real app, you'd update i18n here
+const locale = computed({
+  get: () => (i18nLocale.value as Locale) || 'en',
+  set: (value: Locale) => setLocale(value)
+})
+const changeLocale = (lang: Locale) => {
+  setLocale(lang)
 }
 
 // ===== Data =====
@@ -375,13 +376,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  border: 1px solid transparent;
   padding: 0.6rem 0.75rem;
   border-radius: 0.5rem;
   color: #a9c2c5;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: all 0.15s;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .nav-link .nav-icon {
   width: 1.25rem;
@@ -394,6 +396,8 @@ onMounted(() => {
 .nav-link:not(.active):hover {
   background: var(--bridge-menu);
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 3px 0 0 var(--bridge-cyan), 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
 .side-bottom {

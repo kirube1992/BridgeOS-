@@ -40,7 +40,6 @@ onMounted(loadUsers)
         <router-link to="/decisions">Decisions</router-link>
         <router-link class="current" to="/people">People & teams</router-link>
         <router-link to="/analytics">Analytics</router-link>
-        <router-link to="/alliance">The Alliance</router-link>
       </div>
       <div class="user-actions"><router-link :to="`/profile/${user?.id || ''}`">{{ user?.name || user?.email }}</router-link><button type="button" @click="logout">Log out</button></div>
     </nav>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAiStore } from '@/stores/ai'
 import type { Project, WorkItem, Decision } from '@/types'
 
@@ -11,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const ai = useAiStore()
+const { locale } = useI18n()
 
 const input = ref('')
 const scrollerRef = ref<HTMLElement | null>(null)
@@ -62,7 +64,7 @@ const ask = async (text?: string) => {
   if (!question) return
   input.value = ''
   const context = buildContext()
-  await ai.ask(question, props.project?.id, context)
+  await ai.ask(question, props.project?.id, context, (locale.value as 'en' | 'zh') || 'en')
 }
 
 const askSuggested = (q: string) => ask(q)

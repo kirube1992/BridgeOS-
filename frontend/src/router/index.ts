@@ -16,8 +16,6 @@ import AdminDepartments from '@/Views/AdminDepartments.vue'
 import AdminDepartmentDetail from '@/Views/AdminDepartmentDetail.vue'
 import WeeklyReport from '@/Views/WeeklyReport.vue'
 import AITools from '@/Views/AITools.vue'
-import CompanyAlliance from '@/Views/CompanyAlliance.vue'
-import CompanyProfile from '@/Views/CompanyProfile.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes: RouteRecordRaw[] = [
@@ -97,18 +95,6 @@ const routes: RouteRecordRaw[] = [
     path: '/ai',
     name: 'ai-tools',
     component: AITools,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/alliance',
-    name: 'company-alliance',
-    component: CompanyAlliance,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/company/:id',
-    name: 'company-profile',
-    component: CompanyProfile,
     meta: { requiresAuth: true }
   },
   {

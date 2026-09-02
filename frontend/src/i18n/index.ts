@@ -51,7 +51,7 @@ const messages = {
     },
     dashboard: {
       workspace: 'Workspace', overview: 'Overview', myTasks: 'My tasks', projects: 'Projects', people: 'People & teams', ethiopia: 'Ethiopia', china: 'China',
-      logout: 'Log out / 退出', member: 'BridgeOS member', teamMember: 'Team member',
+        decisions: 'Decisions', analytics: 'Analytics', reports: 'Weekly Report', aiTools: 'AI Tools', departments: 'Departments', logout: 'Log out', member: 'BridgeOS member', teamMember: 'Team member',
       date: 'TUESDAY · 18 AUGUST 2026', greeting: 'Good morning, {name}.',
       languageSummary: 'English · 中文',
       statsLabel: 'Workspace summary', activeProjects: 'Active projects', activeProjectsZh: '活跃项目', openTasks: 'Open tasks', openTasksZh: '待处理任务', teamMembers: 'Team members', teamMembersZh: '团队成员',
@@ -81,7 +81,7 @@ const messages = {
       languageLabel: '语言选择'
     },
     dashboard: {
-      workspace: '工作区', overview: '总览', myTasks: '我的任务', projects: '项目', people: '成员与团队', ethiopia: '埃塞俄比亚', china: '中国', logout: '退出登录 / Log out', member: 'BridgeOS 成员', teamMember: '团队成员', date: '2026年8月18日 · 星期二', greeting: '早上好，{name}。', languageSummary: '中文 · English',
+    workspace: '工作区', overview: '总览', myTasks: '我的任务', projects: '项目', decisions: '决策', analytics: '分析', reports: '周报', aiTools: 'AI 工具', departments: '部门', people: '成员与团队', ethiopia: '埃塞俄比亚', china: '中国', logout: '退出登录', member: 'BridgeOS 成员', teamMember: '团队成员', date: '2026年8月18日 · 星期二', greeting: '早上好，{name}。', languageSummary: '中文 · English',
       statsLabel: '工作区摘要', activeProjects: '活跃项目', activeProjectsZh: '活跃项目', openTasks: '待处理任务', openTasksZh: '待处理任务', teamMembers: '团队成员', teamMembersZh: '团队成员', totalProjects: '共 {count} 个项目', openTaskSummary: '{count} 个待处理任务', teamSummary: '实时团队目录', loading: '正在刷新...', refresh: '刷新', retry: '重试', loadError: '无法加载最新的工作区数据。', loadingTasks: '正在加载最近任务...', noTasks: '暂无最近任务。', loadingTeam: '正在加载团队目录...', noMembers: '暂无团队成员。', moreMembers: '另有 {count} 位成员', monthChange: '来自工作区的实时数据', dueWeek: '仅统计待处理任务', countries: '实时团队目录',
       queueTitle: '工作队列', queueZh: 'Work queue', queueDescription: '共享优先级，明确下一步。', addTask: '+ 添加任务', pulseTitle: '团队动态', pulseZh: 'Team pulse', pulseDescription: '按地点查看工作量', shared: '共享团队', timezone: 'UTC+3 / UTC+8', note: '更多上下文会带来更好的交接。请将决策和验收说明附在每个任务中。',
       tasks: {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/API/index'
+import axios from 'axios'
 import type {
   AiTranslateResponse,
   AiExtractMeetingResponse,
@@ -9,6 +9,14 @@ import type {
   RequirementTranslationEntity,
   AiChatMessage
 } from '@/types'
+
+const aiApi = axios.create({
+  baseURL: '/ai',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 5000
+})
 
 interface AiState {
   health: AiHealthResponse | null
@@ -55,7 +63,7 @@ export const useAiStore = defineStore('ai', {
     async checkHealth() {
       this.healthLoading = true
       try {
-        const response = await api.get<AiHealthResponse>('/ai/health')
+        const response = await aiApi.get<AiHealthResponse>('/health')
         this.health = response.data
         return { success: true, data: this.health }
       } catch (err: any) {
@@ -74,7 +82,7 @@ export const useAiStore = defineStore('ai', {
       this.translateLoading = true
       this.translateError = null
       try {
-        const response = await api.post<AiTranslateResponse>('/ai/translate', {
+        const response = await aiApi.post<AiTranslateResponse>('/translate', {
           text,
           projectId
         })
@@ -100,7 +108,7 @@ export const useAiStore = defineStore('ai', {
       this.translateLoading = true
       this.translateError = null
       try {
-        const response = await api.post<RequirementTranslationEntity>('/ai/translate/save', data)
+        const response = await aiApi.post<RequirementTranslationEntity>('/translate/save', data)
         if (this.lastTranslation) {
           this.lastTranslation.savedId = response.data.id
         }
@@ -116,7 +124,7 @@ export const useAiStore = defineStore('ai', {
     async fetchMyTranslations() {
       this.translateLoading = true
       try {
-        const response = await api.get<RequirementTranslationEntity[]>('/ai/translate/my')
+        const response = await aiApi.get<RequirementTranslationEntity[]>('/translate/my')
         this.savedTranslations = Array.isArray(response.data) ? response.data : []
         return { success: true, data: this.savedTranslations }
       } catch (err: any) {
@@ -130,7 +138,7 @@ export const useAiStore = defineStore('ai', {
       this.extractLoading = true
       this.extractError = null
       try {
-        const response = await api.post<AiExtractMeetingResponse>('/ai/extract-meeting', {
+        const response = await aiApi.post<AiExtractMeetingResponse>('/extract-meeting', {
           notes,
           projectId
         })
@@ -185,7 +193,7 @@ export const useAiStore = defineStore('ai', {
         items[idx]!.promoting = true
       }
       try {
-        const response = await api.post('/ai/extract-meeting/promote', {
+        const response = await aiApi.post('/extract-meeting/promote', {
           description: item.description,
           assignedToUserId: item.suggestedAssignee?.id ?? payload.assignedToUserId ?? undefined,
           dueDate: item.suggestedDueDate ?? undefined,
@@ -206,11 +214,38 @@ export const useAiStore = defineStore('ai', {
       }
     },
 
-    async ask(question: string, projectId?: number, context?: Array<{ type: string; id: number; summary: string }>) {
+    async translateText(text: string, targetLocale: 'en' | 'zh' = 'en', sourceLocale?: 'en' | 'zh') {
+      const trimmed = text.trim()
+      if (!trimmed) {
+        return { success: false, error: 'No text to translate' }
+      }
+
+      try {
+        const response = await aiApi.post('/translate-text', {
+          text: trimmed,
+          targetLocale,
+          sourceLocale
+        })
+        return { success: true, data: response.data }
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err.response?.data?.message || 'Failed to translate text'
+        }
+      }
+    },
+
+    async ask(question: string, projectId?: number, context?: Array<{ type: string; id: number; summary: string }>, locale: 'en' | 'zh' = 'en') {
+      let localizedQuestion = question
+      const translatedQuestion = await this.translateText(question, locale)
+      if (translatedQuestion.success && translatedQuestion.data?.translatedText) {
+        localizedQuestion = translatedQuestion.data.translatedText
+      }
+
       const userMsg: AiChatMessage = {
         id: `u_${Date.now()}`,
         role: 'user',
-        content: question,
+        content: localizedQuestion,
         timestamp: new Date().toISOString()
       }
       this.chatMessages.push(userMsg)
@@ -218,20 +253,27 @@ export const useAiStore = defineStore('ai', {
       this.askError = null
 
       try {
-        const response = await api.post<AiAskResponse>('/ai/ask', {
-          question,
+        const response = await aiApi.post<AiAskResponse>('/ask', {
+          question: localizedQuestion,
           projectId,
           context: context || []
         })
+
+        let answer = response.data.answer
+        const translatedAnswer = await this.translateText(answer, locale, locale === 'zh' ? 'en' : 'zh')
+        if (translatedAnswer.success && translatedAnswer.data?.translatedText) {
+          answer = translatedAnswer.data.translatedText
+        }
+
         const assistantMsg: AiChatMessage = {
           id: `a_${Date.now()}`,
           role: 'assistant',
-          content: response.data.answer,
+          content: answer,
           sources: response.data.sources,
           timestamp: new Date().toISOString()
         }
         this.chatMessages.push(assistantMsg)
-        return { success: true, data: response.data }
+        return { success: true, data: { ...response.data, answer } }
       } catch (err: any) {
         this.askError = err.response?.data?.message || 'AI assistant failed to respond'
         const failMsg: AiChatMessage = {
