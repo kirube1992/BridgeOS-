@@ -11,7 +11,7 @@ import type {
 } from '@/types'
 
 const aiApi = axios.create({
-  baseURL: '/ai',
+  baseURL: import.meta.env.VITE_AI_BASE_URL || '/ai',
   headers: {
     'Content-Type': 'application/json'
   },

@@ -22,8 +22,6 @@ public class AuditService {
     private final UserService userService;
     private  final ProjectService projectService;
     private final AuditEventRepository auditEventRepository;
-
-
     public AuditEvent recordEvent(String eventType, String entityType, Long entityID, String summary, Object detail, Long actorID, Long projectId){
         AuditEvent event = new AuditEvent();
 
